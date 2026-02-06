@@ -812,11 +812,9 @@
             quote1.className = 'love-quote';
             quote1.textContent = `"${loveQuotes[Math.floor(Math.random() * loveQuotes.length)]}"`;
             scene.appendChild(quote1);
-            setTimeout(() => {
-              hintEl.style.display = 'block';
-              hintEl.textContent = '✨ Tap to continue ✨';
-              scene.appendChild(hintEl);
-            }, 1000);
+            hintEl.style.display = 'block';
+            hintEl.textContent = '✨ Tap to continue ✨';
+            scene.appendChild(hintEl);
             break;
 
           case 'images':
@@ -844,9 +842,7 @@
             qSub.textContent = '"Every day with you is Valentine\'s Day"';
             scene.appendChild(qSub);
             
-            setTimeout(() => {
-              showQuestionCard();
-            }, 1000);
+            showQuestionCard();
             break;
 
           case 'final':
@@ -901,15 +897,13 @@
         
         currentImageIndex++;
         
-        // Show hint after animation completes
-        setTimeout(() => {
-          const hint = createEl('div');
-          hint.className = 'nextHint';
-          hint.textContent = currentImageIndex < imageFiles.length 
-            ? '✨ Tap for next moment ✨' 
-            : '✨ Tap to continue ✨';
-          scene.appendChild(hint);
-        }, 900);
+        // Show hint immediately
+        const hint = createEl('div');
+        hint.className = 'nextHint';
+        hint.textContent = currentImageIndex < imageFiles.length 
+          ? '✨ Tap for next moment ✨' 
+          : '✨ Tap to continue ✨';
+        scene.appendChild(hint);
       }
 
       function showQuestionCard(){
@@ -986,36 +980,34 @@
 
         // Populate gallery for final display
         if (imageFiles.length > 0){
-          setTimeout(() => {
-            gallery.innerHTML = '';
-            imageFiles.forEach(imgData => {
-              const item = createEl('div');
-              item.className = 'gallery-item';
-              
-              const img = createEl('img'); 
-              img.src = imgData.url; 
-              img.alt = imgData.name;
-              
-              img.onload = function() {
-                if (this.naturalWidth > this.naturalHeight) {
-                  item.classList.add('landscape');
-                } else {
-                  item.classList.add('portrait');
-                }
-              };
-              
-              const caption = createEl('div');
-              caption.className = 'image-caption';
-              caption.textContent = imgData.caption;
-              
-              item.appendChild(img);
-              item.appendChild(caption);
-              gallery.appendChild(item);
-            });
+          gallery.innerHTML = '';
+          imageFiles.forEach(imgData => {
+            const item = createEl('div');
+            item.className = 'gallery-item';
             
-            gallery.classList.add('final-grid');
-            galleryWrap.style.display = 'block';
-          }, 1000);
+            const img = createEl('img'); 
+            img.src = imgData.url; 
+            img.alt = imgData.name;
+            
+            img.onload = function() {
+              if (this.naturalWidth > this.naturalHeight) {
+                item.classList.add('landscape');
+              } else {
+                item.classList.add('portrait');
+              }
+            };
+            
+            const caption = createEl('div');
+            caption.className = 'image-caption';
+            caption.textContent = imgData.caption;
+            
+            item.appendChild(img);
+            item.appendChild(caption);
+            gallery.appendChild(item);
+          });
+          
+          gallery.classList.add('final-grid');
+          galleryWrap.style.display = 'block';
         }
 
         const senderText = share.sender ? `Sent with all my heart by ${share.sender}` : '';
