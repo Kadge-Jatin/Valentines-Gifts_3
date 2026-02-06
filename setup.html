@@ -6,20 +6,28 @@
   <title>Upload — Save to GitHub</title>
   <style>
     body{font-family:system-ui,Arial;margin:20px;max-width:900px}
-    textarea{width:100%;height:120px}
+    .file-list{margin:10px 0;padding:0;list-style:none}
+    .file-list li{margin:6px 0;padding:6px;border:1px solid #eee;border-radius:6px}
+    .controls{margin-top:12px}
+    button[disabled]{opacity:0.6}
   </style>
 </head>
 <body>
   <h1>Upload files — Save to GitHub</h1>
-  <p>Select files and click Upload. Files will be stored into the repository configured on the server.</p>
+  <p>Select images and/or audio. You can optionally select one audio file to be played as background in the viewer.</p>
 
   <label>Files (multiple):
     <input id="files" type="file" multiple>
   </label>
-  <p>
-    <!-- Server URL is hardcoded below so users don't need to paste it -->
+
+  <div id="filePreview"></div>
+
+  <div class="controls">
+    <!-- If you hardcoded serverUrl earlier, keep it here. Otherwise add an input for server -->
+    <!-- const serverUrl below is used; remove the input if you hardcoded the URL. -->
     <small>Uploads go to the configured server automatically.</small>
-  </p>
+  </div>
+
   <p><button id="upload">Upload & create share</button></p>
 
   <h3>Result</h3>
@@ -29,15 +37,62 @@
     // PUT your Render service URL here (example):
     const serverUrl = "https://uploader-server-h3iz.onrender.com";
 
-    document.getElementById('upload').addEventListener('click', async () => {
-      const files = document.getElementById('files').files;
+    const filesInput = document.getElementById('files');
+    const filePreview = document.getElementById('filePreview');
+    let selectedFiles = [];
+    let bgChoice = ''; // filename chosen as background
+
+    filesInput.addEventListener('change', () => {
+      selectedFiles = Array.from(filesInput.files || []);
+      renderFileList();
+    });
+
+    function renderFileList(){
+      if (!selectedFiles.length){
+        filePreview.innerHTML = '<p>No files selected.</p>';
+        return;
+      }
+      const ul = document.createElement('ul');
+      ul.className = 'file-list';
+      selectedFiles.forEach((f, i) => {
+        const li = document.createElement('li');
+        const isAudio = f.type && f.type.startsWith('audio/');
+        li.innerHTML = `<strong>${f.name}</strong> — ${(f.size/1024).toFixed(1)} KB`;
+        if (isAudio){
+          const id = 'bg_' + i;
+          const radio = document.createElement('input');
+          radio.type = 'radio';
+          radio.name = 'bg';
+          radio.id = id;
+          radio.value = f.name;
+          radio.addEventListener('change', () => bgChoice = radio.value);
+          const label = document.createElement('label');
+          label.htmlFor = id;
+          label.style.marginLeft = '8px';
+          label.textContent = 'Use as background music';
+          li.appendChild(document.createElement('br'));
+          li.appendChild(radio);
+          li.appendChild(label);
+        }
+        ul.appendChild(li);
+      });
+      filePreview.innerHTML = '';
+      filePreview.appendChild(ul);
+    }
+
+    const uploadBtn = document.getElementById('upload');
+    const resDiv = document.getElementById('result');
+
+    uploadBtn.addEventListener('click', async () => {
+      const files = selectedFiles;
       if (!files.length) return alert('Choose one or more files.');
 
       const fd = new FormData();
       for (const f of files) fd.append('files', f, f.name);
+      if (bgChoice) fd.append('bg', bgChoice); // send the chosen background filename
 
-      const resDiv = document.getElementById('result');
-      resDiv.textContent = 'Uploading…';
+      uploadBtn.disabled = true;
+      resDiv.textContent = 'Uploading and publishing… This can take up to 30s. Please wait.';
 
       try {
         const resp = await fetch(serverUrl.replace(/\/$/, '') + '/upload', { method: 'POST', body: fd });
@@ -48,7 +103,11 @@
           `<pre>${JSON.stringify(data.share, null, 2)}</pre>`;
       } catch (err) {
         console.error(err);
-        resDiv.textContent = 'Upload failed: ' + err.message;
+        resDiv.innerHTML = '<p>Upload failed: ' + err.message + '</p>' +
+          '<p><button id="retry">Retry</button></p>';
+        document.getElementById('retry').addEventListener('click', () => location.reload());
+      } finally {
+        uploadBtn.disabled = false;
       }
     });
   </script>
