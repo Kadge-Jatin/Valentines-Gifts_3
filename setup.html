@@ -10,23 +10,26 @@
     .file-list li{margin:6px 0;padding:6px;border:1px solid #eee;border-radius:6px}
     .controls{margin-top:12px}
     button[disabled]{opacity:0.6}
+    label.block{display:block;margin:10px 0}
   </style>
 </head>
 <body>
   <h1>Upload files — Save to GitHub</h1>
-  <p>Select images and/or audio. You can optionally select one audio file to be played as background in the viewer.</p>
+  <p>Select images/documents using the first input and (optionally) one audio file for background music using the audio input below.</p>
 
-  <label>Files (multiple):
-    <input id="files" type="file" multiple>
+  <label class="block">Files (images, docs, etc, multiple):
+    <input id="files" type="file" multiple accept="image/*,application/pdf,image/*,text/*">
+  </label>
+
+  <label class="block">Background audio (optional, single file):
+    <input id="audioFile" type="file" accept="audio/*">
+  </label>
+
+  <label style="display:block;margin-bottom:12px">
+    <input id="useAsBg" type="checkbox"> Use selected audio as background music in the viewer
   </label>
 
   <div id="filePreview"></div>
-
-  <div class="controls">
-    <!-- If you hardcoded serverUrl earlier, keep it here. Otherwise add an input for server -->
-    <!-- const serverUrl below is used; remove the input if you hardcoded the URL. -->
-    <small>Uploads go to the configured server automatically.</small>
-  </div>
 
   <p><button id="upload">Upload & create share</button></p>
 
@@ -34,62 +37,64 @@
   <div id="result">No upload yet</div>
 
   <script>
-    // PUT your Render service URL here (example):
+    // Change this if your Render URL is different
     const serverUrl = "https://uploader-server-h3iz.onrender.com";
 
     const filesInput = document.getElementById('files');
+    const audioInput = document.getElementById('audioFile');
+    const useAsBg = document.getElementById('useAsBg');
     const filePreview = document.getElementById('filePreview');
+    const uploadBtn = document.getElementById('upload');
+    const resDiv = document.getElementById('result');
+
     let selectedFiles = [];
-    let bgChoice = ''; // filename chosen as background
+    let selectedAudio = null;
 
     filesInput.addEventListener('change', () => {
       selectedFiles = Array.from(filesInput.files || []);
       renderFileList();
     });
 
+    audioInput.addEventListener('change', () => {
+      selectedAudio = audioInput.files && audioInput.files[0] ? audioInput.files[0] : null;
+      renderFileList();
+    });
+
     function renderFileList(){
-      if (!selectedFiles.length){
+      const parts = [];
+      if (!selectedFiles.length && !selectedAudio){
         filePreview.innerHTML = '<p>No files selected.</p>';
         return;
       }
       const ul = document.createElement('ul');
       ul.className = 'file-list';
-      selectedFiles.forEach((f, i) => {
+      selectedFiles.forEach(f => {
         const li = document.createElement('li');
-        const isAudio = f.type && f.type.startsWith('audio/');
-        li.innerHTML = `<strong>${f.name}</strong> — ${(f.size/1024).toFixed(1)} KB`;
-        if (isAudio){
-          const id = 'bg_' + i;
-          const radio = document.createElement('input');
-          radio.type = 'radio';
-          radio.name = 'bg';
-          radio.id = id;
-          radio.value = f.name;
-          radio.addEventListener('change', () => bgChoice = radio.value);
-          const label = document.createElement('label');
-          label.htmlFor = id;
-          label.style.marginLeft = '8px';
-          label.textContent = 'Use as background music';
-          li.appendChild(document.createElement('br'));
-          li.appendChild(radio);
-          li.appendChild(label);
-        }
+        li.innerHTML = `<strong>${escapeHtml(f.name)}</strong> — ${(f.size/1024).toFixed(1)} KB`;
         ul.appendChild(li);
       });
+      if (selectedAudio){
+        const li = document.createElement('li');
+        li.innerHTML = `<strong>Audio: ${escapeHtml(selectedAudio.name)}</strong> — ${(selectedAudio.size/1024).toFixed(1)} KB`;
+        ul.appendChild(li);
+      }
       filePreview.innerHTML = '';
       filePreview.appendChild(ul);
     }
 
-    const uploadBtn = document.getElementById('upload');
-    const resDiv = document.getElementById('result');
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
     uploadBtn.addEventListener('click', async () => {
-      const files = selectedFiles;
-      if (!files.length) return alert('Choose one or more files.');
+      if (!selectedFiles.length && !selectedAudio) return alert('Choose one or more files or an audio file.');
 
       const fd = new FormData();
-      for (const f of files) fd.append('files', f, f.name);
-      if (bgChoice) fd.append('bg', bgChoice); // send the chosen background filename
+      for (const f of selectedFiles) fd.append('files', f, f.name);
+      if (selectedAudio){
+        fd.append('files', selectedAudio, selectedAudio.name);
+        if (useAsBg.checked){
+          fd.append('bg', selectedAudio.name);
+        }
+      }
 
       uploadBtn.disabled = true;
       resDiv.textContent = 'Uploading and publishing… This can take up to 30s. Please wait.';
@@ -103,7 +108,7 @@
           `<pre>${JSON.stringify(data.share, null, 2)}</pre>`;
       } catch (err) {
         console.error(err);
-        resDiv.innerHTML = '<p>Upload failed: ' + err.message + '</p>' +
+        resDiv.innerHTML = '<p>Upload failed: ' + (err.message || err) + '</p>' +
           '<p><button id="retry">Retry</button></p>';
         document.getElementById('retry').addEventListener('click', () => location.reload());
       } finally {
