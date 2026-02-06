@@ -1,79 +1,66 @@
 <!doctype html>
-<html lang="en">
+<html>
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>View shared package (no compression)</title>
+  <title>View shared assets</title>
   <style>
     body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;margin:20px;max-width:960px}
     img{max-width:100%;height:auto;margin:8px 0}
     .item{margin-bottom:12px}
-    .warning{color:#b00}
     .meta{font-size:0.9rem;color:#555}
   </style>
 </head>
 <body>
   <h1>Shared assets</h1>
   <div id="content">Loading…</div>
-  <p class="warning" id="err"></p>
 
   <script>
-    function getPayloadFromHash(){
-      const h = location.hash || '';
-      if (!h) return null;
-      const raw = h.replace(/^#/, '');
-      // support d=payload or raw payload
-      if (raw.startsWith('d=')) return raw.slice(2);
-      return raw;
+    function qsParam(name){
+      const params = new URLSearchParams(location.search);
+      return params.get(name);
     }
 
     (async function(){
       const content = document.getElementById('content');
-      const err = document.getElementById('err');
-      try{
-        const payload = getPayloadFromHash();
-        if (!payload) { content.innerHTML = '<p>No data found in URL fragment.</p>'; return; }
+      const id = qsParam('share');
+      if (!id) { content.innerHTML = '<p>No share id.</p>'; return; }
 
-        // NO decompression: decodeURIComponent then parse
-        const json = decodeURIComponent(payload);
-        const pkg = JSON.parse(json);
-
+      // Fetch the share JSON from GitHub Pages static content
+      // shares/{id}.json is committed to the repo by the server and served via GitHub Pages
+      const shareUrl = new URL(`./shares/${id}.json`, location.origin + location.pathname.replace(/\/[^\/]*$/,'/')).href;
+      try {
+        const resp = await fetch(shareUrl);
+        if (!resp.ok) throw new Error('Share not found (HTTP ' + resp.status + ')');
+        const share = await resp.json();
         content.innerHTML = '';
-        if (pkg.images && pkg.images.length){
-          const h = document.createElement('h2'); h.textContent = 'Images'; content.appendChild(h);
-          for (const im of pkg.images){
-            const wrap = document.createElement('div'); wrap.className='item';
-            const img = document.createElement('img'); img.src = im.data; wrap.appendChild(img);
-            const meta = document.createElement('div'); meta.className='meta';
-            const dl = document.createElement('a'); dl.href = im.data; dl.download = im.name || 'image.webp'; dl.textContent = 'Download';
-            meta.appendChild(document.createTextNode((im.name ? im.name+' ' : '') + '(' + (im.type || 'image') + ') '));
+
+        if (share.files && share.files.length) {
+          for (const f of share.files) {
+            const wrap = document.createElement('div'); wrap.className = 'item';
+            if (f.name && /\.(jpe?g|png|gif|webp|svg|bmp)$/i.test(f.name)) {
+              const img = document.createElement('img'); img.src = f.url; wrap.appendChild(img);
+            } else if (f.name && /\.(mp3|wav|ogg|m4a)$/i.test(f.name)) {
+              const a = document.createElement('audio'); a.controls = true; a.src = f.url; wrap.appendChild(a);
+            } else {
+              // generic link
+              const a = document.createElement('a'); a.href = f.url; a.textContent = f.name || f.url; a.target = '_blank'; wrap.appendChild(a);
+            }
+
+            const meta = document.createElement('div'); meta.className = 'meta';
+            const dl = document.createElement('a'); dl.href = f.url; dl.download = f.name || '';
+            dl.textContent = 'Download';
+            meta.appendChild(document.createTextNode((f.name ? f.name + ' ' : '') + '(' + (f.url || '') + ') '));
             meta.appendChild(dl);
             wrap.appendChild(meta);
             content.appendChild(wrap);
           }
+        } else {
+          content.innerHTML = '<p>No files in share.</p>';
         }
-
-        if (pkg.audios && pkg.audios.length){
-          const h = document.createElement('h2'); h.textContent = 'Audio'; content.appendChild(h);
-          for (const au of pkg.audios){
-            const wrap = document.createElement('div'); wrap.className='item';
-            const a = document.createElement('audio'); a.controls = true; a.src = au.data; wrap.appendChild(a);
-            const meta = document.createElement('div'); meta.className='meta';
-            const dl = document.createElement('a'); dl.href = au.data; dl.download = au.name || 'audio'; dl.textContent = 'Download';
-            meta.appendChild(document.createTextNode((au.name ? au.name+' ' : '') + '(' + (au.type || 'audio') + ') '));
-            meta.appendChild(dl);
-            wrap.appendChild(meta);
-            content.appendChild(wrap);
-          }
-        }
-
-        if ((!pkg.images || !pkg.images.length) && (!pkg.audios || !pkg.audios.length)){
-          content.innerHTML = '<p>No images or audio found in package.</p>';
-        }
-      }catch(e){
-        console.error(e);
-        err.textContent = 'Error: ' + e.message;
-        content.innerHTML = '<p>Failed to load package.</p>';
+      } catch (err) {
+        console.error(err);
+        content.innerHTML = '<p>Error loading share: ' + err.message + '</p>';
       }
     })();
   </script>
