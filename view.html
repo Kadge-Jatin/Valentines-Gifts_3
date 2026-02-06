@@ -18,7 +18,7 @@
   <div id="content">Loading…</div>
 
   <div id="audioWidget" style="display:none" class="audio-controls" aria-hidden="true">
-    <span id="audioStatus">Loading music…</span>
+    <span id="audioStatus">Background music</span>
     <button id="playPauseBtn">Play</button>
     <label style="margin-left:8px">Volume
       <input id="volume" type="range" min="0" max="1" step="0.05" value="0.6">
@@ -53,7 +53,6 @@
 
       function renderShare(share){
         content.innerHTML = '';
-        // Render files
         if (share.files && share.files.length) {
           for (const f of share.files) {
             const wrap = document.createElement('div'); wrap.className = 'item';
@@ -77,20 +76,20 @@
           content.innerHTML = '<p>No files in share.</p>';
         }
 
-        // Setup background music if provided
         if (share.background && share.background.url) {
           setupBackgroundAudio(share.background.url, share.background.name || '');
         }
       }
 
       function setupBackgroundAudio(url, name){
-        // create audio element (hidden controls); we will manage UI separately
         audioEl = document.createElement('audio');
         audioEl.src = url;
         audioEl.loop = true;
         audioEl.volume = 0.6;
         audioEl.preload = 'auto';
         audioEl.crossOrigin = 'anonymous';
+        audioEl.style.display = 'none';
+        document.body.appendChild(audioEl);
 
         const widget = document.getElementById('audioWidget');
         const playPauseBtn = document.getElementById('playPauseBtn');
@@ -101,17 +100,7 @@
         widget.style.display = 'block';
         widget.setAttribute('aria-hidden', 'false');
 
-        // Try to autoplay — many browsers block autoplay with sound; catch the error and show Play button
-        audioEl.play().then(() => {
-          isPlaying = true;
-          playPauseBtn.textContent = 'Pause';
-        }).catch((err) => {
-          // Autoplay blocked — show Play button for user gesture
-          isPlaying = false;
-          playPauseBtn.textContent = 'Play';
-          console.warn('Autoplay blocked:', err);
-        });
-
+        // Only play when user presses Play
         playPauseBtn.addEventListener('click', async () => {
           if (!audioEl) return;
           if (isPlaying) {
@@ -125,7 +114,7 @@
               playPauseBtn.textContent = 'Pause';
             } catch (err) {
               console.error('Play failed:', err);
-              alert('Playback blocked by browser. Please interact with the page and try again.');
+              alert('Playback blocked or failed. Please try again or check file format/volume.');
             }
           }
         });
@@ -133,14 +122,6 @@
         volume.addEventListener('input', () => {
           audioEl.volume = Number(volume.value);
         });
-
-        // Start muted autoplay trick (optional): try play muted first to improve UX,
-        // then unmute after user gesture. Many browsers allow muted autoplay.
-        // Here we don't force mute — we attempted normal play above.
-
-        // attach audio element to DOM but keep it visually hidden
-        audioEl.style.display = 'none';
-        document.body.appendChild(audioEl);
       }
     })();
   </script>
