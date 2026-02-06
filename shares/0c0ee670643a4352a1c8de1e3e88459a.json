@@ -1,0 +1,29 @@
+{
+  "id": "0c0ee670643a4352a1c8de1e3e88459a",
+  "created_at": "2026-02-06T20:46:45.449Z",
+  "sender": "Jatin",
+  "receiver": "Helony",
+  "message": "hiii",
+  "theme": "hamster",
+  "files": [
+    {
+      "name": "WhatsApp Image 2026-02-06 at 4.56.47 AM.jpeg",
+      "path": "uploads/0c0ee670643a4352a1c8de1e3e88459a/WhatsApp Image 2026-02-06 at 4.56.47 AM.jpeg",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/0c0ee670643a4352a1c8de1e3e88459a/WhatsApp%20Image%202026-02-06%20at%204.56.47%20AM.jpeg"
+    },
+    {
+      "name": "WhatsApp Image 2026-02-06 at 4.56.46 AM.jpeg",
+      "path": "uploads/0c0ee670643a4352a1c8de1e3e88459a/WhatsApp Image 2026-02-06 at 4.56.46 AM.jpeg",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/0c0ee670643a4352a1c8de1e3e88459a/WhatsApp%20Image%202026-02-06%20at%204.56.46%20AM.jpeg"
+    },
+    {
+      "name": "music_2.mp3",
+      "path": "uploads/0c0ee670643a4352a1c8de1e3e88459a/music_2.mp3",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/0c0ee670643a4352a1c8de1e3e88459a/music_2.mp3"
+    }
+  ],
+  "background": {
+    "name": "music_2.mp3",
+    "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/0c0ee670643a4352a1c8de1e3e88459a/music_2.mp3"
+  }
+}
