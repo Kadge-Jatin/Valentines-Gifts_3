@@ -9,11 +9,21 @@
     img{max-width:100%;height:auto;margin:8px 0}
     .item{margin-bottom:12px}
     .meta{font-size:0.9rem;color:#555}
+    .audio-controls{position:fixed;right:12px;bottom:12px;padding:10px;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+    .audio-controls button{margin-left:8px}
   </style>
 </head>
 <body>
   <h1>Shared assets</h1>
   <div id="content">Loading…</div>
+
+  <div id="audioWidget" style="display:none" class="audio-controls" aria-hidden="true">
+    <span id="audioStatus">Loading music…</span>
+    <button id="playPauseBtn">Play</button>
+    <label style="margin-left:8px">Volume
+      <input id="volume" type="range" min="0" max="1" step="0.05" value="0.6">
+    </label>
+  </div>
 
   <script>
     function qsParam(name){
@@ -21,81 +31,116 @@
       return params.get(name);
     }
 
-    // Try to construct a raw.githubusercontent URL for the share JSON.
-    // This tends to reflect commits immediately and avoids GitHub Pages publish delay.
-    function constructRawShareUrl(id){
-      try {
-        // If page is served as https://<owner>.github.io/<repo>/..., infer owner and repo
-        const hostParts = location.hostname.split('.');
-        const pathParts = location.pathname.split('/').filter(Boolean); // remove empty parts
-        if (hostParts.length >= 3 && hostParts[1] === 'github' && hostParts[2] === 'io' && pathParts.length >= 1) {
-          const owner = hostParts[0];
-          const repo = pathParts[0];
-          const branch = 'main'; // change if you use a different branch
-          return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/shares/${id}.json`;
-        }
-      } catch (e) {
-        // fall back to relative path below
-      }
-      // Fallback: relative path served by GitHub Pages
-      return `./shares/${id}.json`;
-    }
-
-    (async function(){
+    (function(){
       const content = document.getElementById('content');
       const id = qsParam('share');
       if (!id) { content.innerHTML = '<p>No share id.</p>'; return; }
 
-      // first try raw.githubusercontent (fast), then fallback to Pages path if that fails
-      const rawUrl = constructRawShareUrl(id);
-      const candidateUrls = [rawUrl];
-      // if rawUrl is already relative pages path, candidateUrls is fine; otherwise add the ./shares fallback too
-      if (!rawUrl.startsWith('https://raw.githubusercontent.com')) candidateUrls.push(`./shares/${id}.json`);
-      else candidateUrls.push(`./shares/${id}.json`);
+      const shareUrl = new URL(`./shares/${id}.json`, location.origin + location.pathname.replace(/\/[^\/]*$/,'/')).href;
+      fetch(shareUrl)
+        .then(r => {
+          if (!r.ok) throw new Error('Share not found (HTTP ' + r.status + ')');
+          return r.json();
+        })
+        .then(share => renderShare(share))
+        .catch(err => {
+          console.error(err);
+          content.innerHTML = '<p>Share not found yet. Please try again in a minute or refresh.</p>';
+        });
 
-      let share = null;
-      for (const url of candidateUrls){
-        try {
-          const resp = await fetch(url);
-          if (!resp.ok) {
-            // try next candidate
-            continue;
+      let audioEl = null;
+      let isPlaying = false;
+
+      function renderShare(share){
+        content.innerHTML = '';
+        // Render files
+        if (share.files && share.files.length) {
+          for (const f of share.files) {
+            const wrap = document.createElement('div'); wrap.className = 'item';
+            if (f.name && /\.(jpe?g|png|gif|webp|svg|bmp)$/i.test(f.name)) {
+              const img = document.createElement('img'); img.src = f.url; wrap.appendChild(img);
+            } else if (f.name && /\.(mp3|wav|ogg|m4a)$/i.test(f.name)) {
+              const a = document.createElement('audio'); a.controls = true; a.src = f.url; wrap.appendChild(a);
+            } else {
+              const a = document.createElement('a'); a.href = f.url; a.textContent = f.name || f.url; a.target = '_blank'; wrap.appendChild(a);
+            }
+
+            const meta = document.createElement('div'); meta.className = 'meta';
+            const dl = document.createElement('a'); dl.href = f.url; dl.download = f.name || '';
+            dl.textContent = 'Download';
+            meta.appendChild(document.createTextNode((f.name ? f.name + ' ' : '') + '(' + (f.url || '') + ') '));
+            meta.appendChild(dl);
+            wrap.appendChild(meta);
+            content.appendChild(wrap);
           }
-          share = await resp.json();
-          break;
-        } catch (err) {
-          // try next
-          continue;
+        } else {
+          content.innerHTML = '<p>No files in share.</p>';
+        }
+
+        // Setup background music if provided
+        if (share.background && share.background.url) {
+          setupBackgroundAudio(share.background.url, share.background.name || '');
         }
       }
 
-      if (!share) {
-        content.innerHTML = '<p>Share not found yet. Please try again in a minute or refresh.</p>';
-        return;
-      }
+      function setupBackgroundAudio(url, name){
+        // create audio element (hidden controls); we will manage UI separately
+        audioEl = document.createElement('audio');
+        audioEl.src = url;
+        audioEl.loop = true;
+        audioEl.volume = 0.6;
+        audioEl.preload = 'auto';
+        audioEl.crossOrigin = 'anonymous';
 
-      content.innerHTML = '';
-      if (share.files && share.files.length) {
-        for (const f of share.files) {
-          const wrap = document.createElement('div'); wrap.className = 'item';
-          if (f.name && /\.(jpe?g|png|gif|webp|svg|bmp)$/i.test(f.name)) {
-            const img = document.createElement('img'); img.src = f.url; wrap.appendChild(img);
-          } else if (f.name && /\.(mp3|wav|ogg|m4a)$/i.test(f.name)) {
-            const a = document.createElement('audio'); a.controls = true; a.src = f.url; wrap.appendChild(a);
+        const widget = document.getElementById('audioWidget');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const audioStatus = document.getElementById('audioStatus');
+        const volume = document.getElementById('volume');
+
+        audioStatus.textContent = (name ? name + ' • ' : '') + 'Background music';
+        widget.style.display = 'block';
+        widget.setAttribute('aria-hidden', 'false');
+
+        // Try to autoplay — many browsers block autoplay with sound; catch the error and show Play button
+        audioEl.play().then(() => {
+          isPlaying = true;
+          playPauseBtn.textContent = 'Pause';
+        }).catch((err) => {
+          // Autoplay blocked — show Play button for user gesture
+          isPlaying = false;
+          playPauseBtn.textContent = 'Play';
+          console.warn('Autoplay blocked:', err);
+        });
+
+        playPauseBtn.addEventListener('click', async () => {
+          if (!audioEl) return;
+          if (isPlaying) {
+            audioEl.pause();
+            isPlaying = false;
+            playPauseBtn.textContent = 'Play';
           } else {
-            const a = document.createElement('a'); a.href = f.url; a.textContent = f.name || f.url; a.target = '_blank'; wrap.appendChild(a);
+            try {
+              await audioEl.play();
+              isPlaying = true;
+              playPauseBtn.textContent = 'Pause';
+            } catch (err) {
+              console.error('Play failed:', err);
+              alert('Playback blocked by browser. Please interact with the page and try again.');
+            }
           }
+        });
 
-          const meta = document.createElement('div'); meta.className = 'meta';
-          const dl = document.createElement('a'); dl.href = f.url; dl.download = f.name || '';
-          dl.textContent = 'Download';
-          meta.appendChild(document.createTextNode((f.name ? f.name + ' ' : '') + '(' + (f.url || '') + ') '));
-          meta.appendChild(dl);
-          wrap.appendChild(meta);
-          content.appendChild(wrap);
-        }
-      } else {
-        content.innerHTML = '<p>No files in share.</p>';
+        volume.addEventListener('input', () => {
+          audioEl.volume = Number(volume.value);
+        });
+
+        // Start muted autoplay trick (optional): try play muted first to improve UX,
+        // then unmute after user gesture. Many browsers allow muted autoplay.
+        // Here we don't force mute — we attempted normal play above.
+
+        // attach audio element to DOM but keep it visually hidden
+        audioEl.style.display = 'none';
+        document.body.appendChild(audioEl);
       }
     })();
   </script>
