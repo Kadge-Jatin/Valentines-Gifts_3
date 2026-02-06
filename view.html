@@ -87,7 +87,7 @@
       width:200%;
       height:200%;
       background: radial-gradient(circle, rgba(212,86,127,0.03) 0%, transparent 70%);
-      animation: shimmer 12s infinite;
+      animation: shimmer 8s infinite;
     }
     
     @keyframes shimmer {
@@ -114,7 +114,7 @@
       margin:0 0 20px;
       opacity:0;
       transform:translateY(20px);
-      animation:fadeSlideIn 1.8s forwards 0.8s;
+      animation:fadeSlideIn 0.8s forwards 0.3s;
       text-shadow: 2px 2px 4px rgba(212,86,127,0.1);
       line-height:1.2;
     }
@@ -126,7 +126,7 @@
       opacity:0;
       font-weight:400;
       line-height:1.6;
-      animation:fadeSlideIn 1.8s forwards 1.2s;
+      animation:fadeSlideIn 0.8s forwards 0.5s;
     }
     
     .love-quote {
@@ -139,7 +139,7 @@
       border-left:3px solid var(--rose);
       border-right:3px solid var(--rose);
       opacity:0;
-      animation:fadeSlideIn 1.8s forwards 1.6s;
+      animation:fadeSlideIn 0.8s forwards 0.6s;
       line-height:1.8;
     }
     
@@ -155,7 +155,7 @@
       color:var(--rose);
       margin-top:30px;
       opacity:0;
-      animation:pulse 3s infinite, fadeSlideIn 1.8s forwards 2s;
+      animation:pulse 2s infinite, fadeSlideIn 0.8s forwards 0.8s;
       font-style:italic;
     }
     
@@ -194,7 +194,7 @@
       max-width:90%;
       opacity:0;
       transform:scale(0.9) translateY(30px);
-      animation:singleImageAppear 1.5s forwards;
+      animation:singleImageAppear 0.6s forwards;
     }
     
     @keyframes singleImageAppear {
@@ -233,7 +233,7 @@
       line-height:1.6;
       padding:0 10px;
       opacity:0;
-      animation:fadeSlideIn 1.2s forwards 0.8s;
+      animation:fadeSlideIn 0.5s forwards 0.3s;
     }
     
     .gallery-item {
@@ -244,39 +244,39 @@
       box-shadow:0 20px 60px rgba(212,86,127,0.25);
       opacity:0;
       transform:scale(0.8) translateY(50px);
-      animation:cardStack 1.2s forwards;
+      animation:cardStack 0.6s forwards;
       transition:transform 0.5s ease;
       max-width:90%;
     }
     
     /* Stagger the cards with different positions and rotations */
     .gallery-item:nth-child(1) { 
-      animation-delay: 0.3s; 
+      animation-delay: 0.1s; 
       z-index:1;
       transform:rotate(-8deg) translateY(40px);
     }
     .gallery-item:nth-child(2) { 
-      animation-delay: 0.6s; 
+      animation-delay: 0.2s; 
       z-index:2;
       transform:rotate(-4deg) translateY(20px);
     }
     .gallery-item:nth-child(3) { 
-      animation-delay: 0.9s; 
+      animation-delay: 0.3s; 
       z-index:3;
       transform:rotate(0deg) translateY(0px);
     }
     .gallery-item:nth-child(4) { 
-      animation-delay: 1.2s; 
+      animation-delay: 0.4s; 
       z-index:4;
       transform:rotate(4deg) translateY(-20px);
     }
     .gallery-item:nth-child(5) { 
-      animation-delay: 1.5s; 
+      animation-delay: 0.5s; 
       z-index:5;
       transform:rotate(8deg) translateY(-40px);
     }
     .gallery-item:nth-child(6) { 
-      animation-delay: 1.8s; 
+      animation-delay: 0.6s; 
       z-index:6;
       transform:rotate(-6deg) translateY(-60px);
     }
@@ -341,7 +341,7 @@
     .fileGallery.final-grid .gallery-item {
       position:static;
       transform:none !important;
-      animation:galleryItemAppear 1s forwards;
+      animation:galleryItemAppear 0.5s forwards;
       max-width:100%;
     }
     
@@ -399,7 +399,7 @@
       justify-content:center;
       margin-top:40px;
       opacity:0;
-      animation:fadeSlideIn 1.5s forwards 0.8s;
+      animation:fadeSlideIn 0.8s forwards 0.3s;
     }
     
     .bigBtn{
@@ -472,7 +472,7 @@
       gap:12px;
       z-index:100;
       opacity:0;
-      animation:fadeSlideIn 1.5s forwards 3s;
+      animation:fadeSlideIn 0.8s forwards 1.5s;
     }
     
     .audio-controls button {
@@ -511,7 +511,7 @@
       text-align:center;
       line-height:1.8;
       opacity:0;
-      animation:fadeSlideIn 1.5s forwards 0.8s;
+      animation:fadeSlideIn 0.8s forwards 0.5s;
     }
     
     .credit div {
@@ -525,7 +525,7 @@
       right:30px;
       top:30px;
       opacity:0;
-      animation:mascotBounce 2s forwards 2s, float 4s infinite ease-in-out 4s;
+      animation:mascotBounce 1s forwards 1s, float 3s infinite ease-in-out 2s;
       font-size:50px;
       filter:drop-shadow(0 4px 8px rgba(212,86,127,0.2));
     }
@@ -816,7 +816,7 @@
               hintEl.style.display = 'block';
               hintEl.textContent = '✨ Tap to continue ✨';
               scene.appendChild(hintEl);
-            }, 2500);
+            }, 1000);
             break;
 
           case 'images':
@@ -846,7 +846,7 @@
             
             setTimeout(() => {
               showQuestionCard();
-            }, 1500);
+            }, 1000);
             break;
 
           case 'final':
@@ -909,7 +909,7 @@
             ? '✨ Tap for next moment ✨' 
             : '✨ Tap to continue ✨';
           scene.appendChild(hint);
-        }, 2500);
+        }, 900);
       }
 
       function showQuestionCard(){
@@ -1015,7 +1015,7 @@
             
             gallery.classList.add('final-grid');
             galleryWrap.style.display = 'block';
-          }, 1500);
+          }, 1000);
         }
 
         const senderText = share.sender ? `Sent with all my heart by ${share.sender}` : '';
