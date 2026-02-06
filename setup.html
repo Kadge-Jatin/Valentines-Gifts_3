@@ -3,49 +3,103 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Upload — Save to GitHub</title>
+  <title>Create your Valentine — Upload</title>
+  <meta name="description" content="Create a personalized Valentine with images and music.">
   <style>
-    body{font-family:system-ui,Arial;margin:20px;max-width:900px}
-    .file-list{margin:10px 0;padding:0;list-style:none}
-    .file-list li{margin:6px 0;padding:6px;border:1px solid #eee;border-radius:6px}
-    .controls{margin-top:12px}
-    button[disabled]{opacity:0.6}
-    label.block{display:block;margin:10px 0}
+    :root{
+      --bg:#fff7fb;
+      --card:#fff;
+      --accent:#ff5c8a;
+      --muted:#666;
+      --radius:14px;
+      --gap:14px;
+      --max:720px;
+    }
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
+    body{background:linear-gradient(180deg,#fff7fb 0%, #fff 100%);display:flex;align-items:flex-start;justify-content:center;padding:20px}
+    .sheet{width:100%;max-width:var(--max);background:var(--card);border-radius:18px;padding:18px;box-shadow:0 6px 24px rgba(0,0,0,0.06)}
+    h1{margin:0 0 8px;font-family: "Playfair Display", serif;font-size:1.6rem;color:var(--accent)}
+    label{display:block;margin-top:12px;font-size:0.95rem;color:var(--muted)}
+    input[type="text"], textarea, select{width:100%;padding:10px;border-radius:10px;border:1px solid #efe7ef;margin-top:8px;box-sizing:border-box}
+    textarea{min-height:80px;resize:vertical}
+    .row{display:flex;gap:12px}
+    .row > *{flex:1}
+    .hint{font-size:0.85rem;color:#999;margin-top:6px}
+    .actions{display:flex;gap:12px;align-items:center;margin-top:16px}
+    button.primary{background:var(--accent);color:#fff;padding:12px 16px;border:none;border-radius:12px;font-weight:600;flex:1}
+    button.ghost{background:transparent;border:1px solid #f2d6df;color:var(--accent);padding:10px 12px;border-radius:12px}
+    .preview{margin-top:12px}
+    .file-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+    .file-item{display:flex;align-items:center;justify-content:space-between;padding:8px;border-radius:10px;background:#fff6fb;border:1px solid #ffeaf1}
+    .small{font-size:0.85rem;color:#666}
+    .center{display:flex;justify-content:center}
+    .note{font-size:0.85rem;color:#b05b77;margin-top:10px}
+    @media(min-width:720px){
+      body{padding:40px}
+    }
   </style>
 </head>
 <body>
-  <h1>Upload files — Save to GitHub</h1>
-  <p>Select images/documents using the first input and (optionally) one audio file for background music using the audio input below.</p>
+  <div class="sheet">
+    <h1>Make a special Valentine</h1>
+    <p class="small">Create a short, loving experience and share the link with your special someone.</p>
 
-  <label class="block">Files (images, docs, etc, multiple):
-    <input id="files" type="file" multiple accept="image/*,application/pdf,image/*,text/*">
-  </label>
+    <label>From (sender name)
+      <input id="sender" type="text" placeholder="Your name (e.g., Alex)">
+    </label>
 
-  <label class="block">Background audio (optional, single file):
-    <input id="audioFile" type="file" accept="audio/*">
-  </label>
+    <label>To (receiver name)
+      <input id="receiver" type="text" placeholder="Receiver's name (e.g., Sam)">
+    </label>
 
-  <label style="display:block;margin-bottom:12px">
-    <input id="useAsBg" type="checkbox"> Use selected audio as background music in the viewer
-  </label>
+    <label>Short message (optional)
+      <textarea id="message" placeholder="A short personal message to include in the story"></textarea>
+    </label>
 
-  <div id="filePreview"></div>
+    <label>Theme / Mascot
+      <select id="theme">
+        <option value="rabbit">Rabbit (soft)</option>
+        <option value="hamster">Hamster (playful)</option>
+        <option value="classic">Classic (hearts)</option>
+      </select>
+    </label>
 
-  <p><button id="upload">Upload & create share</button></p>
+    <label>Images / files — choose one or more
+      <input id="files" type="file" multiple accept="image/*,application/pdf,text/*">
+    </label>
 
-  <h3>Result</h3>
-  <div id="result">No upload yet</div>
+    <label>Background audio (optional, single file)
+      <input id="audioFile" type="file" accept="audio/*">
+    </label>
+
+    <label style="display:flex;align-items:center;gap:8px;margin-top:8px">
+      <input id="useAsBg" type="checkbox"> Use selected audio as background music
+    </label>
+
+    <div class="preview" id="filePreview">
+      <p class="small">No files selected yet.</p>
+    </div>
+
+    <div class="actions">
+      <button class="primary" id="createBtn">Create & publish</button>
+      <button class="ghost" id="clearBtn" type="button">Clear</button>
+    </div>
+
+    <div id="result" class="note"></div>
+    <p class="hint">Tip: use a short MP3 for best playback experience. Public repo required for the link to be viewable by recipients.</p>
+  </div>
 
   <script>
-    // Change this if your Render URL is different
+    // Hardcoded service URL (replace if yours differs)
     const serverUrl = "https://uploader-server-h3iz.onrender.com";
 
     const filesInput = document.getElementById('files');
     const audioInput = document.getElementById('audioFile');
     const useAsBg = document.getElementById('useAsBg');
     const filePreview = document.getElementById('filePreview');
-    const uploadBtn = document.getElementById('upload');
-    const resDiv = document.getElementById('result');
+    const createBtn = document.getElementById('createBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const resultDiv = document.getElementById('result');
 
     let selectedFiles = [];
     let selectedAudio = null;
@@ -60,61 +114,93 @@
       renderFileList();
     });
 
+    clearBtn.addEventListener('click', () => {
+      document.getElementById('sender').value = '';
+      document.getElementById('receiver').value = '';
+      document.getElementById('message').value = '';
+      document.getElementById('theme').value = 'rabbit';
+      filesInput.value = '';
+      audioInput.value = '';
+      useAsBg.checked = false;
+      selectedFiles = [];
+      selectedAudio = null;
+      renderFileList();
+      resultDiv.textContent = '';
+    });
+
     function renderFileList(){
-      const parts = [];
       if (!selectedFiles.length && !selectedAudio){
-        filePreview.innerHTML = '<p>No files selected.</p>';
+        filePreview.innerHTML = '<p class="small">No files selected yet.</p>';
         return;
       }
-      const ul = document.createElement('ul');
-      ul.className = 'file-list';
+      const container = document.createElement('div');
+      container.className = 'file-list';
       selectedFiles.forEach(f => {
-        const li = document.createElement('li');
-        li.innerHTML = `<strong>${escapeHtml(f.name)}</strong> — ${(f.size/1024).toFixed(1)} KB`;
-        ul.appendChild(li);
+        const it = document.createElement('div');
+        it.className = 'file-item';
+        it.innerHTML = `<div><strong>${escapeHtml(f.name)}</strong><div class="small">${(f.size/1024).toFixed(1)} KB</div></div>
+                        <div class="small">image</div>`;
+        container.appendChild(it);
       });
       if (selectedAudio){
-        const li = document.createElement('li');
-        li.innerHTML = `<strong>Audio: ${escapeHtml(selectedAudio.name)}</strong> — ${(selectedAudio.size/1024).toFixed(1)} KB`;
-        ul.appendChild(li);
+        const it = document.createElement('div');
+        it.className = 'file-item';
+        it.innerHTML = `<div><strong>${escapeHtml(selectedAudio.name)}</strong><div class="small">${(selectedAudio.size/1024).toFixed(1)} KB</div></div>
+                        <div class="small">audio</div>`;
+        container.appendChild(it);
       }
       filePreview.innerHTML = '';
-      filePreview.appendChild(ul);
+      filePreview.appendChild(container);
     }
 
     function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-    uploadBtn.addEventListener('click', async () => {
-      if (!selectedFiles.length && !selectedAudio) return alert('Choose one or more files or an audio file.');
+    createBtn.addEventListener('click', async () => {
+      const sender = document.getElementById('sender').value.trim();
+      const receiver = document.getElementById('receiver').value.trim();
+      const message = document.getElementById('message').value.trim();
+      const theme = document.getElementById('theme').value;
 
-      const fd = new FormData();
-      for (const f of selectedFiles) fd.append('files', f, f.name);
-      if (selectedAudio){
-        fd.append('files', selectedAudio, selectedAudio.name);
-        if (useAsBg.checked){
-          fd.append('bg', selectedAudio.name);
-        }
+      if (!sender) return alert('Please enter your name (sender).');
+      if (!receiver) return alert('Please enter the receiver name.');
+
+      if (!selectedFiles.length && !selectedAudio){
+        if (!confirm('No files or audio selected. Continue anyway?')) return;
       }
 
-      uploadBtn.disabled = true;
-      resDiv.textContent = 'Uploading and publishing… This can take up to 30s. Please wait.';
+      const fd = new FormData();
+      // append images/files
+      for (const f of selectedFiles) fd.append('files', f, f.name);
+      // append audio file if present
+      if (selectedAudio){
+        fd.append('files', selectedAudio, selectedAudio.name);
+        if (useAsBg.checked) fd.append('bg', selectedAudio.name);
+      }
+
+      // metadata fields
+      fd.append('sender', sender);
+      fd.append('receiver', receiver);
+      if (message) fd.append('message', message);
+      if (theme) fd.append('theme', theme);
+
+      createBtn.disabled = true;
+      resultDiv.textContent = 'Uploading and publishing… This can take up to 30s. Please wait.';
 
       try {
         const resp = await fetch(serverUrl.replace(/\/$/, '') + '/upload', { method: 'POST', body: fd });
         const data = await resp.json();
         if (!resp.ok) throw new Error(data.error || JSON.stringify(data));
-        resDiv.innerHTML = '<p>Share URL (copy and give to recipients):</p>' +
-          `<p><a href="${data.pagesURL}" target="_blank">${data.pagesURL}</a></p>` +
-          `<pre>${JSON.stringify(data.share, null, 2)}</pre>`;
+        resultDiv.innerHTML = `<strong>Share link created</strong><br><a href="${data.pagesURL}" target="_blank">${data.pagesURL}</a>`;
       } catch (err) {
         console.error(err);
-        resDiv.innerHTML = '<p>Upload failed: ' + (err.message || err) + '</p>' +
-          '<p><button id="retry">Retry</button></p>';
-        document.getElementById('retry').addEventListener('click', () => location.reload());
+        resultDiv.textContent = 'Upload failed: ' + (err.message || err);
       } finally {
-        uploadBtn.disabled = false;
+        createBtn.disabled = false;
       }
     });
+
+    // init
+    renderFileList();
   </script>
 </body>
 </html>
