@@ -1,0 +1,29 @@
+{
+  "id": "7f4b73305b504aee9b818537943644da",
+  "created_at": "2026-02-06T15:48:14.772Z",
+  "sender": "Jatin",
+  "receiver": "Helony",
+  "message": "Missed you",
+  "theme": "rabbit",
+  "files": [
+    {
+      "name": "WhatsApp Image 2026-02-06 at 4.56.46 AM.jpeg",
+      "path": "uploads/7f4b73305b504aee9b818537943644da/WhatsApp Image 2026-02-06 at 4.56.46 AM.jpeg",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/7f4b73305b504aee9b818537943644da/WhatsApp%20Image%202026-02-06%20at%204.56.46%20AM.jpeg"
+    },
+    {
+      "name": "WhatsApp Image 2026-02-06 at 4.56.48 AM.jpeg",
+      "path": "uploads/7f4b73305b504aee9b818537943644da/WhatsApp Image 2026-02-06 at 4.56.48 AM.jpeg",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/7f4b73305b504aee9b818537943644da/WhatsApp%20Image%202026-02-06%20at%204.56.48%20AM.jpeg"
+    },
+    {
+      "name": "music_2.mp3",
+      "path": "uploads/7f4b73305b504aee9b818537943644da/music_2.mp3",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/7f4b73305b504aee9b818537943644da/music_2.mp3"
+    }
+  ],
+  "background": {
+    "name": "music_2.mp3",
+    "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/7f4b73305b504aee9b818537943644da/music_2.mp3"
+  }
+}
