@@ -1,128 +1,53 @@
 <!doctype html>
-<html lang="en">
+<html>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Setup — Create shareable package (no compression)</title>
+  <title>Upload & create share (upload to GitHub repo)</title>
   <style>
     body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;margin:20px;max-width:900px}
-    .thumb{max-width:220px;display:block;margin:8px 0}
-    .warning{color:#b00}
-    textarea{width:100%;height:140px}
-    input[type=file]{display:block;margin-bottom:8px}
+    textarea{width:100%;height:120px}
   </style>
 </head>
 <body>
-  <h1>Create shareable link (no compression)</h1>
-  <p>Uploads are converted to Data URLs and embedded directly into the link fragment (no compression). Good for very small assets.</p>
+  <h1>Upload files — produce share link</h1>
+  <p>Select images and/or audio and click Upload. Files will be saved into your GitHub repo under uploads/ and a share link will be generated.</p>
 
-  <label>Images (multiple allowed):
-    <input id="images" type="file" accept="image/*" multiple>
+  <label>Files (multiple):
+    <input id="files" type="file" multiple>
   </label>
+  <p>
+    Server URL: <input id="server" placeholder="https://your-server.example" style="width:60%">
+    <small>Set to the domain where the Node uploader is deployed (e.g., https://uploader.example.com).</small>
+  </p>
+  <p><button id="upload">Upload & create share</button></p>
 
-  <label>Audio (optional, multiple allowed):
-    <input id="audios" type="file" accept="audio/*" multiple>
-  </label>
-
-  <label>Max image width (px):
-    <input id="maxw" type="number" value="1200" min="200" />
-  </label>
-
-  <label>Image quality (0.1 - 1):
-    <input id="quality" type="number" step="0.1" value="0.8" min="0.1" max="1" />
-  </label>
-
-  <p><button id="make">Create shareable link</button></p>
-
-  <div id="preview"></div>
-
-  <h3>Shareable link</h3>
-  <textarea id="link" placeholder="Generated link shows here"></textarea>
-  <p class="warning" id="warn"></p>
+  <h3>Result</h3>
+  <div id="result">No upload yet</div>
 
   <script>
-    function readFileAsDataURL(file){ return new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=rej; fr.readAsDataURL(file); }); }
+    document.getElementById('upload').addEventListener('click', async () => {
+      const files = document.getElementById('files').files;
+      const server = document.getElementById('server').value.trim();
+      if (!server) return alert('Enter server URL where uploader is deployed.');
+      if (!files.length) return alert('Choose one or more files.');
 
-    async function resizeImage(file, maxWidth, quality){
-      const url = URL.createObjectURL(file);
-      const img = await new Promise((res,rej)=>{
-        const el = new Image();
-        el.onload = ()=>res(el);
-        el.onerror = rej;
-        el.src = url;
-      });
-      URL.revokeObjectURL(url);
-      const scale = Math.min(1, maxWidth / img.width);
-      const w = Math.round(img.width * scale);
-      const h = Math.round(img.height * scale);
-      const canvas = document.createElement('canvas');
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
-      return new Promise((res)=> {
-        canvas.toBlob(blob => {
-          const fr = new FileReader();
-          fr.onload = ()=>res(fr.result); // dataURL
-          fr.readAsDataURL(blob);
-        }, 'image/webp', quality);
-      });
-    }
+      const fd = new FormData();
+      for (const f of files) fd.append('files', f, f.name);
 
-    document.getElementById('make').addEventListener('click', async ()=>{
-      const images = Array.from(document.getElementById('images').files || []);
-      const audios = Array.from(document.getElementById('audios').files || []);
-      const maxw = parseInt(document.getElementById('maxw').value) || 1200;
-      const quality = parseFloat(document.getElementById('quality').value) || 0.8;
+      const resDiv = document.getElementById('result');
+      resDiv.textContent = 'Uploading…';
 
-      const preview = document.getElementById('preview');
-      preview.innerHTML = '<p>Processing…</p>';
-      const packageObj = {images: [], audios: []};
-
-      for (const f of images){
-        try{
-          const dataURL = await resizeImage(f, maxw, quality);
-          packageObj.images.push({name: f.name, type: f.type, data: dataURL});
-        }catch(e){
-          console.error('image process failed', e);
-        }
-      }
-
-      for (const f of audios){
-        try{
-          const dataURL = await readFileAsDataURL(f);
-          packageObj.audios.push({name: f.name, type: f.type, data: dataURL});
-        }catch(e){
-          console.error('audio process failed', e);
-        }
-      }
-
-      const json = JSON.stringify(packageObj);
-      // NO compression: URL-encode JSON
-      const payload = encodeURIComponent(json);
-
-      // Compose shareable URL (fragment). Place data after #d=
-      const base = location.origin + location.pathname.replace(/setup\.html$/,'').replace(/\/$/,'') + '/';
-      const viewPath = base + 'view.html#d=' + payload;
-      document.getElementById('link').value = viewPath;
-
-      // preview
-      preview.innerHTML = '';
-      for (const im of packageObj.images){
-        const imgEl = document.createElement('img');
-        imgEl.src = im.data;
-        imgEl.className = 'thumb';
-        preview.appendChild(imgEl);
-      }
-      for (const au of packageObj.audios){
-        const a = document.createElement('audio'); a.controls = true; a.src = au.data; preview.appendChild(a);
-      }
-
-      const warn = document.getElementById('warn');
-      if (payload.length > 20000){
-        warn.textContent = 'Warning: payload is large ('+Math.round(payload.length/1024)+' KB). Many apps may truncate very long URLs.';
-      } else {
-        warn.textContent = '';
+      try {
+        const resp = await fetch(server.replace(/\/$/, '') + '/upload', { method: 'POST', body: fd });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.error || JSON.stringify(data));
+        resDiv.innerHTML = '<p>Share URL (copy and give to recipients):</p>' +
+          `<p><a href="${data.pagesURL}" target="_blank">${data.pagesURL}</a></p>` +
+          `<pre>${JSON.stringify(data.share, null, 2)}</pre>`;
+      } catch (err) {
+        console.error(err);
+        resDiv.textContent = 'Upload failed: ' + err.message;
       }
     });
   </script>
