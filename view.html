@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>View shared package</title>
+  <title>View shared package (no compression)</title>
   <style>
     body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;margin:20px;max-width:960px}
     img{max-width:100%;height:auto;margin:8px 0}
@@ -17,16 +17,13 @@
   <div id="content">Loading…</div>
   <p class="warning" id="err"></p>
 
-  <script src="https://unpkg.com/lz-string/libs/lz-string.min.js"></script>
   <script>
-    function qsHashParam(name){
-      // support #d=... or #d:... or full plain payload
+    function getPayloadFromHash(){
       const h = location.hash || '';
       if (!h) return null;
-      const m = h.match(/[?&]*/); // noop to keep pattern
       const raw = h.replace(/^#/, '');
+      // support d=payload or raw payload
       if (raw.startsWith('d=')) return raw.slice(2);
-      // maybe plain payload
       return raw;
     }
 
@@ -34,11 +31,11 @@
       const content = document.getElementById('content');
       const err = document.getElementById('err');
       try{
-        const payload = qsHashParam('d');
+        const payload = getPayloadFromHash();
         if (!payload) { content.innerHTML = '<p>No data found in URL fragment.</p>'; return; }
-        // decompress
-        const json = LZString.decompressFromEncodedURIComponent(payload);
-        if (!json) throw new Error('Failed to decompress payload (maybe corrupted or unsupported).');
+
+        // NO decompression: decodeURIComponent then parse
+        const json = decodeURIComponent(payload);
         const pkg = JSON.parse(json);
 
         content.innerHTML = '';
