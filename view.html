@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>View shared package</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;margin:20px;max-width:960px}
+    img{max-width:100%;height:auto;margin:8px 0}
+    .item{margin-bottom:12px}
+    .warning{color:#b00}
+    .meta{font-size:0.9rem;color:#555}
+  </style>
+</head>
+<body>
+  <h1>Shared assets</h1>
+  <div id="content">Loading…</div>
+  <p class="warning" id="err"></p>
+
+  <script src="https://unpkg.com/lz-string/libs/lz-string.min.js"></script>
+  <script>
+    function qsHashParam(name){
+      // support #d=... or #d:... or full plain payload
+      const h = location.hash || '';
+      if (!h) return null;
+      const m = h.match(/[?&]*/); // noop to keep pattern
+      const raw = h.replace(/^#/, '');
+      if (raw.startsWith('d=')) return raw.slice(2);
+      // maybe plain payload
+      return raw;
+    }
+
+    (async function(){
+      const content = document.getElementById('content');
+      const err = document.getElementById('err');
+      try{
+        const payload = qsHashParam('d');
+        if (!payload) { content.innerHTML = '<p>No data found in URL fragment.</p>'; return; }
+        // decompress
+        const json = LZString.decompressFromEncodedURIComponent(payload);
+        if (!json) throw new Error('Failed to decompress payload (maybe corrupted or unsupported).');
+        const pkg = JSON.parse(json);
+
+        content.innerHTML = '';
+        if (pkg.images && pkg.images.length){
+          const h = document.createElement('h2'); h.textContent = 'Images'; content.appendChild(h);
+          for (const im of pkg.images){
+            const wrap = document.createElement('div'); wrap.className='item';
+            const img = document.createElement('img'); img.src = im.data; wrap.appendChild(img);
+            const meta = document.createElement('div'); meta.className='meta';
+            const dl = document.createElement('a'); dl.href = im.data; dl.download = im.name || 'image.webp'; dl.textContent = 'Download';
+            meta.appendChild(document.createTextNode((im.name ? im.name+' ' : '') + '(' + (im.type || 'image') + ') '));
+            meta.appendChild(dl);
+            wrap.appendChild(meta);
+            content.appendChild(wrap);
+          }
+        }
+
+        if (pkg.audios && pkg.audios.length){
+          const h = document.createElement('h2'); h.textContent = 'Audio'; content.appendChild(h);
+          for (const au of pkg.audios){
+            const wrap = document.createElement('div'); wrap.className='item';
+            const a = document.createElement('audio'); a.controls = true; a.src = au.data; wrap.appendChild(a);
+            const meta = document.createElement('div'); meta.className='meta';
+            const dl = document.createElement('a'); dl.href = au.data; dl.download = au.name || 'audio'; dl.textContent = 'Download';
+            meta.appendChild(document.createTextNode((au.name ? au.name+' ' : '') + '(' + (au.type || 'audio') + ') '));
+            meta.appendChild(dl);
+            wrap.appendChild(meta);
+            content.appendChild(wrap);
+          }
+        }
+
+        if ((!pkg.images || !pkg.images.length) && (!pkg.audios || !pkg.audios.length)){
+          content.innerHTML = '<p>No images or audio found in package.</p>';
+        }
+      }catch(e){
+        console.error(e);
+        err.textContent = 'Error: ' + e.message;
+        content.innerHTML = '<p>Failed to load package.</p>';
+      }
+    })();
+  </script>
+</body>
+</html>
