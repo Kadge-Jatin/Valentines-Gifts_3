@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>View shared assets</title>
   <style>
-    body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;margin:20px;max-width:960px}
+    body{font-family:system-ui,Arial;margin:20px;max-width:960px}
     img{max-width:100%;height:auto;margin:8px 0}
     .item{margin-bottom:12px}
     .meta{font-size:0.9rem;color:#555}
@@ -26,8 +26,6 @@
       const id = qsParam('share');
       if (!id) { content.innerHTML = '<p>No share id.</p>'; return; }
 
-      // Fetch the share JSON from GitHub Pages static content
-      // shares/{id}.json is committed to the repo by the server and served via GitHub Pages
       const shareUrl = new URL(`./shares/${id}.json`, location.origin + location.pathname.replace(/\/[^\/]*$/,'/')).href;
       try {
         const resp = await fetch(shareUrl);
@@ -43,7 +41,6 @@
             } else if (f.name && /\.(mp3|wav|ogg|m4a)$/i.test(f.name)) {
               const a = document.createElement('audio'); a.controls = true; a.src = f.url; wrap.appendChild(a);
             } else {
-              // generic link
               const a = document.createElement('a'); a.href = f.url; a.textContent = f.name || f.url; a.target = '_blank'; wrap.appendChild(a);
             }
 
