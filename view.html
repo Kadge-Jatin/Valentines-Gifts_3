@@ -35,7 +35,6 @@
   </style>
   <!-- include confetti via CDN -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <!-- optional: lottie-player for mascot (if you want Lottie mascots later) -->
   <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 </head>
 <body>
@@ -63,7 +62,6 @@
   </div>
 
   <script>
-    // Utility
     function qsParam(name){ return new URLSearchParams(location.search).get(name); }
     function el(q){ return document.querySelector(q); }
     function createEl(tag, attrs){ const e = document.createElement(tag); for(const k in (attrs||{})) e.setAttribute(k, attrs[k]); return e; }
@@ -88,7 +86,6 @@
         return;
       }
 
-      // Build share URL relative - uses Pages path
       const shareUrl = new URL(`./shares/${id}.json`, location.origin + location.pathname.replace(/\/[^\/]*$/,'/')).href;
 
       fetch(shareUrl).then(r=>{
@@ -104,19 +101,15 @@
         hintEl.style.display = 'none';
       });
 
-      // story steps sequence (simple finite state machine)
       const steps = ['intro','revealGallery','question','final'];
       let stepIndex = 0;
 
       function startStory(){
-        // initial greeting uses receiver & sender
         const receiver = share.receiver || 'friend';
-        const sender = share.sender || '';
         greetingEl.textContent = `Hi ${receiver}!`;
         subEl.innerHTML = `This surprise was made especially for you ❤️`;
         hintEl.textContent = 'Tap to continue';
 
-        // Prepare gallery but keep hidden until revealGallery
         if (share.files && share.files.length){
           gallery.innerHTML = '';
           for (const f of share.files){
@@ -126,17 +119,16 @@
           }
         }
 
-        // prepare background audio widget if present
         if (share.background && share.background.url){
           setupAudioWidget(share.background.url, share.background.name);
+          // show controls from the start so users can control playback immediately
+          el('#audioWidget').style.display = 'flex';
         }
 
-        // show initial small mascot (optional using lottie) based on theme
         renderMascot(share.theme || 'rabbit');
 
-        // wire tap/swipe to advance
+        // wire tap/swipe to advance; first user interaction will also trigger audio (see setupAudioWidget)
         scene.addEventListener('click', advance);
-        // simple swipe detection for mobile (left/right)
         let touchStartY = null;
         scene.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; });
         scene.addEventListener('touchend', e => {
@@ -158,15 +150,12 @@
           case 'revealGallery':
             greetingEl.textContent = share.receiver ? `For ${share.receiver}` : 'A little gallery';
             subEl.textContent = share.message ? share.message : 'Some memories for you';
-            // show gallery
             if (gallery.children.length){
               galleryWrap.style.display = 'block';
             } else {
-              // skip to question if no gallery
               renderStep('question');
               return;
             }
-            // show hint
             hintEl.style.display = 'block';
             hintEl.textContent = 'Tap to continue';
             break;
@@ -174,17 +163,14 @@
           case 'question':
             greetingEl.textContent = 'Will you be my Valentine?';
             subEl.textContent = '';
-            // show big buttons
             showQuestionCard();
             break;
 
           case 'final':
-            // reveal final message with credit + confetti
             showFinal();
             break;
 
           default:
-            // keep intro or fallback
             hintEl.style.display = 'block';
             hintEl.textContent = 'Tap to continue';
             break;
@@ -192,9 +178,7 @@
       }
 
       function showQuestionCard(){
-        // remove gallery hint
         galleryWrap.style.display = 'none';
-        // create buttons
         const row = document.createElement('div');
         row.className = 'btnRow';
         const yes = document.createElement('button');
@@ -202,39 +186,26 @@
         const ab = document.createElement('button');
         ab.className = 'bigBtn ab'; ab.textContent = 'ABSOLUTELY YES 💖';
 
-        // clear scene and set new nodes
-        subEl.textContent = '';
-        // place buttons in scene
-        // first remove existing controls
         const existing = scene.querySelector('.btnRow');
         if (existing) existing.remove();
         scene.appendChild(row);
         row.appendChild(yes); row.appendChild(ab);
 
-        // button handlers
         yes.addEventListener('click', () => { onAnswer('yes'); });
         ab.addEventListener('click', () => { onAnswer('absolutely'); });
       }
 
       function onAnswer(choice){
-        // animate confetti and move to final
-        // run a burst of confetti with hearts-like colors
         confetti({
           particleCount: 120,
           spread: 50,
           origin: { y: 0.6 },
           colors: ['#ff7aa3','#ffd1e0','#ff5c8a','#fff2f6']
         });
-        // play a small audio cue if background exists (optional)
-        // proceed to final after short delay for animation
-        setTimeout(()=>{
-          // advance to final step
-          renderStep('final');
-        }, 800);
+        setTimeout(()=>{ renderStep('final'); }, 800);
       }
 
       function showFinal(){
-        // clear scene
         scene.innerHTML = '';
         const title = document.createElement('div');
         title.className = 'greeting';
@@ -245,21 +216,16 @@
         scene.appendChild(title);
         scene.appendChild(line);
 
-        // show gallery again (if present)
         if (gallery.children.length){
           galleryWrap.style.display = 'block';
         }
 
-        // show credits
         const senderText = share.sender ? `Sent with love by ${share.sender}` : '';
         const receiverText = share.receiver ? `For ${share.receiver}` : '';
         credit.style.display = 'block';
         credit.innerHTML = `<div>${senderText}</div><div>${receiverText}</div>`;
 
-        // show audio widget (play button) if present (audio widget already prepared)
-        if (share.background && share.background.url){
-          el('#audioWidget').style.display = 'flex';
-        }
+        // audio widget is already visible from the start if present
       }
 
       function setupAudioWidget(url, name){
@@ -274,6 +240,31 @@
 
         const playBtn = el('#playPauseBtn');
         const volume = el('#volume');
+
+        // Try to play immediately (may be blocked by autoplay policies)
+        audioEl.play().then(()=>{
+          isPlaying = true;
+          playBtn.textContent = 'Pause';
+        }).catch((err)=>{
+          // autoplay blocked — we'll start playback on first user gesture
+          isPlaying = false;
+        });
+
+        // start on first user gesture (click/tap anywhere) if not already playing
+        const startOnGesture = async () => {
+          if (!audioEl) return;
+          if (!isPlaying){
+            try {
+              await audioEl.play();
+              isPlaying = true;
+              playBtn.textContent = 'Pause';
+            } catch (e) {
+              console.warn('Play on gesture failed', e);
+            }
+          }
+          document.removeEventListener('click', startOnGesture);
+        };
+        document.addEventListener('click', startOnGesture, { once: true });
 
         playBtn.addEventListener('click', async () => {
           if (!audioEl) return;
@@ -299,7 +290,6 @@
       }
 
       function renderMascot(theme){
-        // Minimal mascot placeholder: a small svg or Lottie can be used. For now we show a subtle emoji or Lottie tag.
         const mascotWrap = document.createElement('div');
         mascotWrap.style.position = 'absolute';
         mascotWrap.style.right = '20px';
@@ -321,7 +311,6 @@
           elL.style.fontSize = '36px';
           mascotWrap.appendChild(elL);
         }
-        // attach to card
         const card = el('#card');
         card.style.position = 'relative';
         card.appendChild(mascotWrap);
