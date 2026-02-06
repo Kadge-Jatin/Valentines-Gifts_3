@@ -237,9 +237,19 @@
     }
     
     button.primary:disabled{
-      opacity:0.6;
+      opacity:0.5;
       cursor:not-allowed;
       transform:none;
+      background:linear-gradient(135deg, #ccc 0%, #999 100%);
+    }
+    
+    button.primary:disabled:hover{
+      transform:none;
+      box-shadow:0 10px 30px rgba(212,86,127,0.3);
+    }
+    
+    button.primary:disabled::before{
+      display:none;
     }
     
     button.ghost{
@@ -459,8 +469,17 @@
       <p class="small" style="color:#999;">No files selected yet</p>
     </div>
 
+    <div class="terms-section" style="margin-top:25px;">
+      <label style="display:flex;align-items:start;gap:12px;cursor:pointer;margin-top:0;">
+        <input type="checkbox" id="termsCheckbox" style="margin-top:4px;width:auto;cursor:pointer;">
+        <span style="font-size:0.95rem;color:#666;line-height:1.6;font-weight:400;font-family:'Crimson Text',serif;">
+          By continuing, you agree that uploaded media is used only to generate this experience. Files may be removed periodically for privacy and storage management. Please save or screen record your memory if you wish to keep it permanently.
+        </span>
+      </label>
+    </div>
+
     <div class="actions">
-      <button class="primary" id="createBtn">✨ Create & Publish ✨</button>
+      <button class="primary" id="createBtn" disabled>✨ Create & Publish ✨</button>
       <button class="ghost" id="clearBtn" type="button">Clear All</button>
     </div>
 
@@ -497,9 +516,15 @@
     const createBtn = document.getElementById('createBtn');
     const clearBtn = document.getElementById('clearBtn');
     const resultDiv = document.getElementById('result');
+    const termsCheckbox = document.getElementById('termsCheckbox');
 
     let selectedFiles = [];
     let selectedAudio = null;
+
+    // Handle terms checkbox
+    termsCheckbox.addEventListener('change', () => {
+      createBtn.disabled = !termsCheckbox.checked;
+    });
 
     filesInput.addEventListener('change', () => {
       selectedFiles = Array.from(filesInput.files || []);
@@ -520,6 +545,8 @@
       audioInput.value = '';
       selectedFiles = [];
       selectedAudio = null;
+      termsCheckbox.checked = false;
+      createBtn.disabled = true;
       renderFileList();
       resultDiv.style.display = 'none';
       resultDiv.textContent = '';
