@@ -3,22 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Upload & create share (upload to GitHub repo)</title>
+  <title>Upload — Save to GitHub</title>
   <style>
-    body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;margin:20px;max-width:900px}
+    body{font-family:system-ui,Arial;margin:20px;max-width:900px}
     textarea{width:100%;height:120px}
   </style>
 </head>
 <body>
-  <h1>Upload files — produce share link</h1>
-  <p>Select images and/or audio and click Upload. Files will be saved into your GitHub repo under uploads/ and a share link will be generated.</p>
+  <h1>Upload files — Save to GitHub</h1>
+  <p>Select files and click Upload. Files will be stored into the repository configured on the server.</p>
 
   <label>Files (multiple):
     <input id="files" type="file" multiple>
   </label>
   <p>
-    Server URL: <input id="server" placeholder="https://your-server.example" style="width:60%">
-    <small>Set to the domain where the Node uploader is deployed (e.g., https://uploader.example.com).</small>
+    Server URL: <input id="server" placeholder="https://your-render-service.onrender.com" style="width:60%">
+    <small>Paste the Render service URL here after you deploy the backend (step later).</small>
   </p>
   <p><button id="upload">Upload & create share</button></p>
 
@@ -29,7 +29,7 @@
     document.getElementById('upload').addEventListener('click', async () => {
       const files = document.getElementById('files').files;
       const server = document.getElementById('server').value.trim();
-      if (!server) return alert('Enter server URL where uploader is deployed.');
+      if (!server) return alert('Enter server URL where uploader is deployed (Render URL).');
       if (!files.length) return alert('Choose one or more files.');
 
       const fd = new FormData();
