@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Setup — Create shareable package</title>
+  <title>Setup — Create shareable package (no compression)</title>
   <style>
     body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;margin:20px;max-width:900px}
     .thumb{max-width:220px;display:block;margin:8px 0}
@@ -13,8 +13,8 @@
   </style>
 </head>
 <body>
-  <h1>Create shareable link (client-side only)</h1>
-  <p>Upload images and optional audio. Assets are encoded into the generated link. No uploads to third parties.</p>
+  <h1>Create shareable link (no compression)</h1>
+  <p>Uploads are converted to Data URLs and embedded directly into the link fragment (no compression). Good for very small assets.</p>
 
   <label>Images (multiple allowed):
     <input id="images" type="file" accept="image/*" multiple>
@@ -40,14 +40,9 @@
   <textarea id="link" placeholder="Generated link shows here"></textarea>
   <p class="warning" id="warn"></p>
 
-  <script src="https://unpkg.com/lz-string/libs/lz-string.min.js"></script>
   <script>
-    // Helper: read file as ArrayBuffer
-    function readFileAsArrayBuffer(file){ return new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=rej; fr.readAsArrayBuffer(file); }); }
-    // Helper: read file as DataURL
     function readFileAsDataURL(file){ return new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=rej; fr.readAsDataURL(file); }); }
 
-    // Resize image via canvas and return dataURL (WebP)
     async function resizeImage(file, maxWidth, quality){
       const url = URL.createObjectURL(file);
       const img = await new Promise((res,rej)=>{
@@ -65,7 +60,6 @@
       canvas.height = h;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, w, h);
-      // toDataURL may be synchronous for some browsers; we use toBlob to control quality
       return new Promise((res)=> {
         canvas.toBlob(blob => {
           const fr = new FileReader();
@@ -85,7 +79,6 @@
       preview.innerHTML = '<p>Processing…</p>';
       const packageObj = {images: [], audios: []};
 
-      // Process images: resize -> dataURL
       for (const f of images){
         try{
           const dataURL = await resizeImage(f, maxw, quality);
@@ -95,7 +88,6 @@
         }
       }
 
-      // Process audios: read as dataURL (note: audio files can be big)
       for (const f of audios){
         try{
           const dataURL = await readFileAsDataURL(f);
@@ -105,18 +97,16 @@
         }
       }
 
-      // Stringify and compress (LZ-String)
       const json = JSON.stringify(packageObj);
-      // compress to encoded URI component (URL-safe)
-      const payload = LZString.compressToEncodedURIComponent(json);
+      // NO compression: URL-encode JSON
+      const payload = encodeURIComponent(json);
 
-      // Compose shareable URL: put in fragment so it is never sent to servers during HTTP requests
-      const origin = location.origin + location.pathname.replace(/setup\.html$/,'').replace(/\/$/,'') + '/';
-      // If your view page is view.html in same folder:
-      const viewPath = origin + 'view.html#d=' + payload;
+      // Compose shareable URL (fragment). Place data after #d=
+      const base = location.origin + location.pathname.replace(/setup\.html$/,'').replace(/\/$/,'') + '/';
+      const viewPath = base + 'view.html#d=' + payload;
       document.getElementById('link').value = viewPath;
 
-      // Show preview thumbnails
+      // preview
       preview.innerHTML = '';
       for (const im of packageObj.images){
         const imgEl = document.createElement('img');
@@ -125,17 +115,12 @@
         preview.appendChild(imgEl);
       }
       for (const au of packageObj.audios){
-        const aEl = document.createElement('audio');
-        aEl.controls = true;
-        aEl.src = au.data;
-        preview.appendChild(aEl);
+        const a = document.createElement('audio'); a.controls = true; a.src = au.data; preview.appendChild(a);
       }
 
-      // Warn about size
       const warn = document.getElementById('warn');
-      const approxLen = payload.length;
-      if (approxLen > 20000){
-        warn.textContent = 'Warning: payload is large ('+Math.round(approxLen/1024)+' KB). Very long URLs may be truncated by some apps. Consider reducing image dimensions or quality.';
+      if (payload.length > 20000){
+        warn.textContent = 'Warning: payload is large ('+Math.round(payload.length/1024)+' KB). Many apps may truncate very long URLs.';
       } else {
         warn.textContent = '';
       }
