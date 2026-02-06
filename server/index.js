@@ -1,10 +1,15 @@
 const express = require('express');
+const cors = require('cors');
 const multer = require('multer');
 const { Octokit } = require('@octokit/rest');
 const { v4: uuidv4 } = require('uuid');
 
 const upload = multer(); // memory storage
 const app = express();
+
+// Allow CORS for all origins (for testing). For production, restrict this to your GitHub Pages origin.
+app.use(cors());
+app.use(express.json());
 
 const OWNER = process.env.REPO_OWNER;     // e.g., "Kadge-Jatin"
 const REPO = process.env.REPO_NAME;      // e.g., "Valentines-Gifts_3"
@@ -17,7 +22,6 @@ if (!OWNER || !REPO || !TOKEN) {
 
 const octokit = new Octokit({ auth: TOKEN });
 
-// simple health
 app.get('/', (req, res) => res.send('GitHub uploader running'));
 
 // Upload endpoint: accepts multiple files in "files" field
@@ -26,23 +30,18 @@ app.post('/upload', upload.array('files'), async (req, res) => {
     const files = req.files || [];
     if (!files.length) return res.status(400).json({ error: 'No files uploaded (form field "files")' });
 
-    // Make a short unique id for this upload
     const id = uuidv4().replace(/-/g, '');
-
-    // Determine default branch for raw URL construction
     const repoInfo = await octokit.repos.get({ owner: OWNER, repo: REPO });
     const branch = repoInfo.data.default_branch || 'main';
     const rawBase = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${branch}/`;
 
-    // Commit each file at path uploads/{id}/{originalname}
     const uploaded = [];
     for (const f of files) {
-      // sanitize filename a bit (remove leading slashes)
       const name = (f.originalname || 'file').replace(/^\/+/, '');
       const path = `uploads/${id}/${name}`;
       const contentBase64 = f.buffer.toString('base64');
 
-      // Create the file in the repo
+      // Create or update file
       await octokit.repos.createOrUpdateFileContents({
         owner: OWNER,
         repo: REPO,
@@ -59,7 +58,6 @@ app.post('/upload', upload.array('files'), async (req, res) => {
       });
     }
 
-    // Create a share descriptor JSON in shares/{id}.json
     const shareObj = {
       id,
       created_at: new Date().toISOString(),
@@ -77,12 +75,11 @@ app.post('/upload', upload.array('files'), async (req, res) => {
       branch
     });
 
-    // Public share URL (GitHub Pages must be enabled for the repo)
     const pagesURL = `https://${OWNER}.github.io/${REPO}/view.html?share=${id}`;
 
     return res.json({ id, pagesURL, share: shareObj });
   } catch (err) {
-    console.error(err);
+    console.error('Upload error:', err);
     return res.status(500).json({ error: err.message || String(err) });
   }
 });
