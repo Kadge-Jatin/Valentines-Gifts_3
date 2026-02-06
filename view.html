@@ -16,6 +16,8 @@
       --cream:#fff9fc;
       --gold:#d4a574;
       --shadow:rgba(212,86,127,0.15);
+      --pop-duration:520ms;
+      --pop-ease:cubic-bezier(.2,.9,.25,1);
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html,body{
@@ -236,6 +238,32 @@
       animation:fadeSlideIn 0.5s forwards 0.3s;
     }
     
+    /* --- POP IN / OUT ANIMATION (smooth) --- */
+    @keyframes popIn {
+      0% { transform: scale(0.88) translateY(28px); opacity: 0; filter: blur(6px); }
+      60% { transform: scale(1.04) translateY(-6px); opacity: 1; filter: blur(0); }
+      100% { transform: scale(1) translateY(0); opacity: 1; filter: none; }
+    }
+    @keyframes popOut {
+      0% { transform: scale(1) translateY(0); opacity: 1; filter: none; }
+      100% { transform: scale(0.9) translateY(24px); opacity: 0; filter: blur(4px); }
+    }
+    .single-image-container.pop-enter {
+      animation: popIn var(--pop-duration) var(--pop-ease) forwards;
+    }
+    .single-image-container.pop-exit {
+      animation: popOut 360ms ease forwards;
+    }
+    .single-image-container .image-caption { transition: opacity 300ms ease; }
+    @media (prefers-reduced-motion: reduce) {
+      .single-image-container.pop-enter,
+      .single-image-container.pop-exit {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+    /* --- end pop animations --- */
+
     .gallery-item {
       position:absolute;
       background:#fff;
@@ -856,54 +884,88 @@
         }
       }
 
-      function showNextImage(){
-        if (currentImageIndex >= imageFiles.length) {
-          return;
-        }
+      // Helper: preload image and get orientation metadata
+      function preloadImage(url) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => {
+            resolve({ width: img.naturalWidth || img.width, height: img.naturalHeight || img.height, url });
+          };
+          img.onerror = (e) => reject(e);
+          img.src = url;
+        });
+      }
 
-        scene.innerHTML = '';
-        galleryWrap.style.display = 'none';
+      // Smooth showNextImage: preload, insert off-DOM, animate pop-in, animate old out
+      async function showNextImage(){
+        if (currentImageIndex >= imageFiles.length) return;
 
         const imageData = imageFiles[currentImageIndex];
-        const container = createEl('div');
-        container.className = 'single-image-view';
-        
-        const imageCard = createEl('div');
-        imageCard.className = 'single-image-container';
-        
+
+        // preload image
+        let meta;
+        try {
+          meta = await preloadImage(imageData.url);
+        } catch (err) {
+          console.warn('Image preload failed', err);
+          meta = { width: 1000, height: 700, url: imageData.url };
+        }
+
+        // create new container off-DOM
+        const newContainer = createEl('div');
+        newContainer.className = 'single-image-container';
+        if (meta.width > meta.height) newContainer.classList.add('landscape');
+        else newContainer.classList.add('portrait');
+
         const img = createEl('img');
-        img.src = imageData.url;
-        img.alt = imageData.name;
-        
-        // Detect orientation after load
-        img.onload = function() {
-          if (this.naturalWidth > this.naturalHeight) {
-            imageCard.classList.add('landscape');
-          } else {
-            imageCard.classList.add('portrait');
-          }
-        };
-        
+        img.src = meta.url;
+        img.alt = imageData.name || '';
+
         const caption = createEl('div');
         caption.className = 'image-caption';
-        caption.textContent = imageData.caption;
-        
-        imageCard.appendChild(img);
-        imageCard.appendChild(caption);
-        container.appendChild(imageCard);
-        
+        caption.textContent = imageData.caption || '';
+
+        newContainer.appendChild(img);
+        newContainer.appendChild(caption);
+
+        // capture any existing container to animate out
+        const oldContainer = scene.querySelector('.single-image-container');
+
+        // replace scene content with new wrapper to avoid layout jumps
         scene.innerHTML = '';
-        scene.appendChild(container);
-        
+        const wrapper = createEl('div');
+        wrapper.className = 'single-image-view';
+        wrapper.appendChild(newContainer);
+        scene.appendChild(wrapper);
+
+        // force reflow then add enter class to trigger pop-in
+        newContainer.offsetHeight; // force reflow
+        newContainer.classList.add('pop-enter');
+
         currentImageIndex++;
-        
-        // Show hint immediately
+
+        // attach hint below the image
         const hint = createEl('div');
         hint.className = 'nextHint';
-        hint.textContent = currentImageIndex < imageFiles.length 
-          ? '✨ Tap for next moment ✨' 
-          : '✨ Tap to continue ✨';
+        hint.textContent = currentImageIndex < imageFiles.length ? '✨ Tap for next moment ✨' : '✨ Tap to continue ✨';
         scene.appendChild(hint);
+
+        // animate old container out if present (in case it exists from previous state)
+        if (oldContainer) {
+          // ensure old container has pop-exit animation
+          oldContainer.classList.remove('pop-enter');
+          oldContainer.classList.add('pop-exit');
+          oldContainer.addEventListener('animationend', () => {
+            try { if (oldContainer && oldContainer.parentNode) oldContainer.parentNode.removeChild(oldContainer); } catch(e){}
+          }, { once: true });
+        }
+
+        // prefetch next image to warm cache (non-blocking)
+        if (currentImageIndex < imageFiles.length) {
+          const nextUrl = imageFiles[currentImageIndex].url;
+          const p = new Image(); p.src = nextUrl;
+        }
       }
 
       function showQuestionCard(){
