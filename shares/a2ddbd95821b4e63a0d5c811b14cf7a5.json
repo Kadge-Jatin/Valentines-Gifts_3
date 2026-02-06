@@ -1,0 +1,29 @@
+{
+  "id": "a2ddbd95821b4e63a0d5c811b14cf7a5",
+  "created_at": "2026-02-06T21:06:49.914Z",
+  "sender": "Juoo",
+  "receiver": "H",
+  "message": "jk",
+  "theme": "classic",
+  "files": [
+    {
+      "name": "WhatsApp Image 2026-02-06 at 4.56.46 AM.jpeg",
+      "path": "uploads/a2ddbd95821b4e63a0d5c811b14cf7a5/WhatsApp Image 2026-02-06 at 4.56.46 AM.jpeg",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/a2ddbd95821b4e63a0d5c811b14cf7a5/WhatsApp%20Image%202026-02-06%20at%204.56.46%20AM.jpeg"
+    },
+    {
+      "name": "WhatsApp Image 2026-02-06 at 4.56.48 AM.jpeg",
+      "path": "uploads/a2ddbd95821b4e63a0d5c811b14cf7a5/WhatsApp Image 2026-02-06 at 4.56.48 AM.jpeg",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/a2ddbd95821b4e63a0d5c811b14cf7a5/WhatsApp%20Image%202026-02-06%20at%204.56.48%20AM.jpeg"
+    },
+    {
+      "name": "music_2.mp3",
+      "path": "uploads/a2ddbd95821b4e63a0d5c811b14cf7a5/music_2.mp3",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/a2ddbd95821b4e63a0d5c811b14cf7a5/music_2.mp3"
+    }
+  ],
+  "background": {
+    "name": "music_2.mp3",
+    "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/a2ddbd95821b4e63a0d5c811b14cf7a5/music_2.mp3"
+  }
+}
