@@ -1,466 +1,145 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💖 Create Your Valentine Card</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Georgia', 'Garamond', serif;
-            overflow-x: hidden;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        h1 {
-            color: #764ba2;
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: 2rem;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 1rem;
-        }
-
-        .section {
-            margin-bottom: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            border-left: 4px solid #f5576c;
-        }
-
-        .section-title {
-            color: #764ba2;
-            font-size: 1.3rem;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-
-        label {
-            display: block;
-            color: #333;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-
-        input[type="text"], textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 1rem;
-            margin-bottom: 15px;
-            transition: border-color 0.3s;
-            font-family: inherit;
-        }
-
-        textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        input[type="text"]:focus, textarea:focus {
-            outline: none;
-            border-color: #764ba2;
-        }
-
-        .upload-area {
-            border: 2px dashed #764ba2;
-            border-radius: 10px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: white;
-            margin-bottom: 15px;
-        }
-
-        .upload-area:hover {
-            background: #f0f0f0;
-            border-color: #f5576c;
-        }
-
-        input[type="file"] {
-            display: none;
-        }
-
-        .upload-icon {
-            font-size: 3rem;
-            margin-bottom: 10px;
-        }
-
-        .upload-text {
-            color: #666;
-            font-size: 0.95rem;
-        }
-
-        .file-list {
-            margin-top: 15px;
-        }
-
-        .file-item {
-            background: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid #ddd;
-        }
-
-        .file-name {
-            color: #333;
-            font-size: 0.9rem;
-            flex: 1;
-            text-align: left;
-        }
-
-        .remove-btn {
-            background: #f5576c;
-            color: white;
-            border: none;
-            padding: 5px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.85rem;
-        }
-
-        .preview-images {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .preview-img {
-            width: 100%;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 2px solid #ddd;
-        }
-
-        .generate-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            border: none;
-            padding: 18px;
-            border-radius: 12px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.3);
-        }
-
-        .generate-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
-        }
-
-        .generate-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .result-section {
-            display: none;
-            margin-top: 30px;
-            padding: 25px;
-            background: #e8f5e9;
-            border-radius: 15px;
-            border: 2px solid #4caf50;
-        }
-
-        .result-section.show {
-            display: block;
-        }
-
-        .result-title {
-            color: #2e7d32;
-            font-size: 1.3rem;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .share-link {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            border: 2px solid #4caf50;
-            word-break: break-all;
-            font-family: monospace;
-            font-size: 0.85rem;
-            margin-bottom: 15px;
-            color: #333;
-            max-height: 150px;
-            overflow-y: auto;
-        }
-
-        .copy-btn, .open-btn {
-            width: 100%;
-            background: #4caf50;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .copy-btn:hover, .open-btn:hover {
-            background: #45a049;
-        }
-
-        .open-btn {
-            background: #2196F3;
-        }
-
-        .open-btn:hover {
-            background: #0b7dda;
-        }
-
-        .info-box {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-
-        .info-box p {
-            margin: 5px 0;
-            color: #856404;
-            font-size: 0.9rem;
-        }
-
-        .loading {
-            text-align: center;
-            color: #666;
-            padding: 20px;
-            display: none;
-        }
-
-        .loading.show {
-            display: block;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #764ba2;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 20px;
-            }
-            h1 {
-                font-size: 1.5rem;
-            }
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Setup — Create shareable package</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;margin:20px;max-width:900px}
+    .thumb{max-width:220px;display:block;margin:8px 0}
+    .warning{color:#b00}
+    textarea{width:100%;height:140px}
+    input[type=file]{display:block;margin-bottom:8px}
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>💖 Create Your Valentine Card</h1>
-        <p class="subtitle">Create a personalized romantic experience in minutes</p>
+  <h1>Create shareable link (client-side only)</h1>
+  <p>Upload images and optional audio. Assets are encoded into the generated link. No uploads to third parties.</p>
 
-        <div class="info-box">
-            <p><strong>📝 How it works:</strong></p>
-            <p>1. Enter your names</p>
-            <p>2. Paste image URLs (or upload to any free image host)</p>
-            <p>3. Paste music URL (optional)</p>
-            <p>4. Click "Generate Link"</p>
-            <p>5. Share the link with your special someone ❤️</p>
-        </div>
+  <label>Images (multiple allowed):
+    <input id="images" type="file" accept="image/*" multiple>
+  </label>
 
-        <!-- Names Section -->
-        <div class="section">
-            <div class="section-title">👤 Personalization</div>
-            <label for="senderName">Your Name (From):</label>
-            <input type="text" id="senderName" placeholder="e.g., John">
-            
-            <label for="receiverName">Their Name (To):</label>
-            <input type="text" id="receiverName" placeholder="e.g., Sarah">
-        </div>
+  <label>Audio (optional, multiple allowed):
+    <input id="audios" type="file" accept="audio/*" multiple>
+  </label>
 
-        <!-- Images Section -->
-        <div class="section">
-            <div class="section-title">📸 Photos</div>
-            <label>Paste image URLs (one per line):</label>
-            <p style="font-size: 0.85rem; color: #666; margin-bottom: 10px;">
-                Upload your photos to <a href="https://imgur.com/upload" target="_blank" style="color: #764ba2;">Imgur</a>, 
-                <a href="https://imgbb.com/" target="_blank" style="color: #764ba2;">ImgBB</a>, or 
-                <a href="https://postimages.org/" target="_blank" style="color: #764ba2;">PostImages</a> 
-                (all free!), then paste the direct image URLs below:
-            </p>
-            <textarea id="imageUrls" placeholder="https://i.imgur.com/abc123.jpg
-https://i.imgur.com/def456.png
-https://i.imgur.com/ghi789.jpg"></textarea>
-        </div>
+  <label>Max image width (px):
+    <input id="maxw" type="number" value="1200" min="200" />
+  </label>
 
-        <!-- Music Section -->
-        <div class="section">
-            <div class="section-title">🎵 Background Music</div>
-            <label>Paste music URL (Optional):</label>
-            <p style="font-size: 0.85rem; color: #666; margin-bottom: 10px;">
-                Upload your song to <a href="https://vocaroo.com/" target="_blank" style="color: #764ba2;">Vocaroo</a>, 
-                <a href="https://soundcloud.com/upload" target="_blank" style="color: #764ba2;">SoundCloud</a>, or 
-                <a href="https://www.dropbox.com/" target="_blank" style="color: #764ba2;">Dropbox</a>, 
-                then paste the direct MP3 URL:
-            </p>
-            <input type="text" id="musicUrl" placeholder="https://example.com/song.mp3">
-        </div>
+  <label>Image quality (0.1 - 1):
+    <input id="quality" type="number" step="0.1" value="0.8" min="0.1" max="1" />
+  </label>
 
-        <!-- Generate Button -->
-        <button class="generate-btn" id="generateBtn" onclick="generateLink()">
-            ✨ Generate Shareable Link
-        </button>
+  <p><button id="make">Create shareable link</button></p>
 
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Generating your card...</p>
-        </div>
+  <div id="preview"></div>
 
-        <!-- Result Section -->
-        <div class="result-section" id="resultSection">
-            <div class="result-title">🎉 Your Valentine Card is Ready!</div>
-            <p style="text-align: center; color: #2e7d32; margin-bottom: 15px;">
-                Share this link with your special someone:
-            </p>
-            <div class="share-link" id="shareLink"></div>
-            <button class="open-btn" onclick="openCard()">👁️ Preview Card</button>
-            <button class="copy-btn" onclick="copyLink()">📋 Copy Link</button>
-        </div>
-    </div>
+  <h3>Shareable link</h3>
+  <textarea id="link" placeholder="Generated link shows here"></textarea>
+  <p class="warning" id="warn"></p>
 
-    <script>
-        function generateLink() {
-            const senderName = document.getElementById('senderName').value.trim();
-            const receiverName = document.getElementById('receiverName').value.trim();
-            const imageUrlsText = document.getElementById('imageUrls').value.trim();
-            const musicUrl = document.getElementById('musicUrl').value.trim();
+  <script src="https://unpkg.com/lz-string/libs/lz-string.min.js"></script>
+  <script>
+    // Helper: read file as ArrayBuffer
+    function readFileAsArrayBuffer(file){ return new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=rej; fr.readAsArrayBuffer(file); }); }
+    // Helper: read file as DataURL
+    function readFileAsDataURL(file){ return new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=rej; fr.readAsDataURL(file); }); }
 
-            // Validation
-            if (!senderName || !receiverName) {
-                alert('Please enter both names!');
-                return;
-            }
+    // Resize image via canvas and return dataURL (WebP)
+    async function resizeImage(file, maxWidth, quality){
+      const url = URL.createObjectURL(file);
+      const img = await new Promise((res,rej)=>{
+        const el = new Image();
+        el.onload = ()=>res(el);
+        el.onerror = rej;
+        el.src = url;
+      });
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, maxWidth / img.width);
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      // toDataURL may be synchronous for some browsers; we use toBlob to control quality
+      return new Promise((res)=> {
+        canvas.toBlob(blob => {
+          const fr = new FileReader();
+          fr.onload = ()=>res(fr.result); // dataURL
+          fr.readAsDataURL(blob);
+        }, 'image/webp', quality);
+      });
+    }
 
-            if (!imageUrlsText) {
-                alert('Please add at least one image URL!');
-                return;
-            }
+    document.getElementById('make').addEventListener('click', async ()=>{
+      const images = Array.from(document.getElementById('images').files || []);
+      const audios = Array.from(document.getElementById('audios').files || []);
+      const maxw = parseInt(document.getElementById('maxw').value) || 1200;
+      const quality = parseFloat(document.getElementById('quality').value) || 0.8;
 
-            // Parse image URLs
-            const imageUrls = imageUrlsText
-                .split('\n')
-                .map(url => url.trim())
-                .filter(url => url.length > 0);
+      const preview = document.getElementById('preview');
+      preview.innerHTML = '<p>Processing…</p>';
+      const packageObj = {images: [], audios: []};
 
-            if (imageUrls.length === 0) {
-                alert('Please add at least one valid image URL!');
-                return;
-            }
-
-            // Show loading
-            document.getElementById('loading').classList.add('show');
-            document.getElementById('generateBtn').disabled = true;
-
-            // Create data object (text only, no base64!)
-            const cardData = {
-                s: senderName,      // Short keys to reduce URL length
-                r: receiverName,
-                i: imageUrls,
-                m: musicUrl || null
-            };
-
-            // Encode to URL-safe format
-            const jsonString = JSON.stringify(cardData);
-            const compressed = btoa(encodeURIComponent(jsonString));
-
-            // Generate link
-            const baseUrl = window.location.href.replace('setup.html', 'card.html').replace('index.html', 'card.html');
-            const shareUrl = `${baseUrl}#${compressed}`;
-
-            // Hide loading
-            setTimeout(() => {
-                document.getElementById('loading').classList.remove('show');
-                document.getElementById('generateBtn').disabled = false;
-
-                // Display result
-                document.getElementById('shareLink').textContent = shareUrl;
-                document.getElementById('resultSection').classList.add('show');
-
-                // Scroll to result
-                document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
-            }, 500);
+      // Process images: resize -> dataURL
+      for (const f of images){
+        try{
+          const dataURL = await resizeImage(f, maxw, quality);
+          packageObj.images.push({name: f.name, type: f.type, data: dataURL});
+        }catch(e){
+          console.error('image process failed', e);
         }
+      }
 
-        function copyLink() {
-            const link = document.getElementById('shareLink').textContent;
-            navigator.clipboard.writeText(link).then(() => {
-                const btn = event.target;
-                const originalText = btn.textContent;
-                btn.textContent = '✅ Copied!';
-                btn.style.background = '#2e7d32';
-                
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.style.background = '#4caf50';
-                }, 2000);
-            }).catch(err => {
-                // Fallback
-                const textArea = document.createElement('textarea');
-                textArea.value = link;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                alert('Link copied!');
-            });
+      // Process audios: read as dataURL (note: audio files can be big)
+      for (const f of audios){
+        try{
+          const dataURL = await readFileAsDataURL(f);
+          packageObj.audios.push({name: f.name, type: f.type, data: dataURL});
+        }catch(e){
+          console.error('audio process failed', e);
         }
+      }
 
-        function openCard() {
-            const link = document.getElementById('shareLink').textContent;
-            window.open(link, '_blank');
-        }
-    </script>
+      // Stringify and compress (LZ-String)
+      const json = JSON.stringify(packageObj);
+      // compress to encoded URI component (URL-safe)
+      const payload = LZString.compressToEncodedURIComponent(json);
+
+      // Compose shareable URL: put in fragment so it is never sent to servers during HTTP requests
+      const origin = location.origin + location.pathname.replace(/setup\.html$/,'').replace(/\/$/,'') + '/';
+      // If your view page is view.html in same folder:
+      const viewPath = origin + 'view.html#d=' + payload;
+      document.getElementById('link').value = viewPath;
+
+      // Show preview thumbnails
+      preview.innerHTML = '';
+      for (const im of packageObj.images){
+        const imgEl = document.createElement('img');
+        imgEl.src = im.data;
+        imgEl.className = 'thumb';
+        preview.appendChild(imgEl);
+      }
+      for (const au of packageObj.audios){
+        const aEl = document.createElement('audio');
+        aEl.controls = true;
+        aEl.src = au.data;
+        preview.appendChild(aEl);
+      }
+
+      // Warn about size
+      const warn = document.getElementById('warn');
+      const approxLen = payload.length;
+      if (approxLen > 20000){
+        warn.textContent = 'Warning: payload is large ('+Math.round(approxLen/1024)+' KB). Very long URLs may be truncated by some apps. Consider reducing image dimensions or quality.';
+      } else {
+        warn.textContent = '';
+      }
+    });
+  </script>
 </body>
 </html>
