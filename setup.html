@@ -326,6 +326,56 @@
       border-bottom-color:var(--rose);
     }
     
+    .link-container{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-top:15px;
+      padding:12px;
+      background:rgba(255,255,255,0.8);
+      border-radius:12px;
+      border:1px solid rgba(212,86,127,0.2);
+    }
+    
+    .link-container a{
+      flex:1;
+      color:var(--deep-rose);
+      font-weight:600;
+      text-decoration:none;
+      word-break:break-all;
+    }
+    
+    .copy-btn{
+      background:var(--rose);
+      color:#fff;
+      border:none;
+      padding:10px 16px;
+      border-radius:8px;
+      cursor:pointer;
+      font-family:'Crimson Text',serif;
+      font-size:0.95rem;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      transition:all 0.3s;
+      white-space:nowrap;
+      flex-shrink:0;
+    }
+    
+    .copy-btn:hover{
+      background:var(--deep-rose);
+      transform:translateY(-2px);
+      box-shadow:0 4px 12px rgba(212,86,127,0.3);
+    }
+    
+    .copy-btn.copied{
+      background:#4caf50;
+    }
+    
+    .copy-icon{
+      font-size:1.1rem;
+    }
+    
     .decorative-heart{
       position:absolute;
       font-size:60px;
@@ -539,7 +589,55 @@
         const resp = await fetch(serverUrl.replace(/\/$/, '') + '/upload', { method: 'POST', body: fd });
         const data = await resp.json();
         if (!resp.ok) throw new Error(data.error || JSON.stringify(data));
-        resultDiv.innerHTML = `<strong>🎉 Your Valentine is ready!</strong><br><br>Share this link with your special someone:<br><a href="${data.pagesURL}" target="_blank">${data.pagesURL}</a>`;
+        
+        resultDiv.innerHTML = `
+          <strong>🎉 Your Valentine is ready!</strong><br><br>
+          <div style="margin-bottom:10px;">Share this link with your special someone:</div>
+          <div class="link-container">
+            <a href="${data.pagesURL}" target="_blank" id="generatedLink">${data.pagesURL}</a>
+            <button class="copy-btn" id="copyBtn">
+              <span class="copy-icon">📋</span>
+              <span id="copyText">Copy</span>
+            </button>
+          </div>
+        `;
+        
+        // Add copy functionality
+        const copyBtn = document.getElementById('copyBtn');
+        const copyText = document.getElementById('copyText');
+        const generatedLink = document.getElementById('generatedLink');
+        
+        copyBtn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(data.pagesURL);
+            copyBtn.classList.add('copied');
+            copyText.textContent = '✓ Copied!';
+            setTimeout(() => {
+              copyBtn.classList.remove('copied');
+              copyText.textContent = 'Copy';
+            }, 2000);
+          } catch (err) {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = data.pagesURL;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+              document.execCommand('copy');
+              copyBtn.classList.add('copied');
+              copyText.textContent = '✓ Copied!';
+              setTimeout(() => {
+                copyBtn.classList.remove('copied');
+                copyText.textContent = 'Copy';
+              }, 2000);
+            } catch (e) {
+              alert('Copy failed. Please manually select and copy the link.');
+            }
+            document.body.removeChild(textArea);
+          }
+        });
       } catch (err) {
         console.error(err);
         resultDiv.innerHTML = '❌ Upload failed: ' + (err.message || err);
