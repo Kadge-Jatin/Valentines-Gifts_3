@@ -17,8 +17,8 @@
     <input id="files" type="file" multiple>
   </label>
   <p>
-    Server URL: <input id="server" placeholder="https://your-render-service.onrender.com" style="width:60%">
-    <small>Paste the Render service URL here after you deploy the backend (step later).</small>
+    <!-- Server URL is hardcoded below so users don't need to paste it -->
+    <small>Uploads go to the configured server automatically.</small>
   </p>
   <p><button id="upload">Upload & create share</button></p>
 
@@ -26,10 +26,11 @@
   <div id="result">No upload yet</div>
 
   <script>
+    // PUT your Render service URL here (example):
+    const serverUrl = "https://your-service.onrender.com";
+
     document.getElementById('upload').addEventListener('click', async () => {
       const files = document.getElementById('files').files;
-      const server = document.getElementById('server').value.trim();
-      if (!server) return alert('Enter server URL where uploader is deployed (Render URL).');
       if (!files.length) return alert('Choose one or more files.');
 
       const fd = new FormData();
@@ -39,7 +40,7 @@
       resDiv.textContent = 'Uploading…';
 
       try {
-        const resp = await fetch(server.replace(/\/$/, '') + '/upload', { method: 'POST', body: fd });
+        const resp = await fetch(serverUrl.replace(/\/$/, '') + '/upload', { method: 'POST', body: fd });
         const data = await resp.json();
         if (!resp.ok) throw new Error(data.error || JSON.stringify(data));
         resDiv.innerHTML = '<p>Share URL (copy and give to recipients):</p>' +
