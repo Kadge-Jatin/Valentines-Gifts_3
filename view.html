@@ -3,118 +3,292 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>View shared assets</title>
+  <title>Your Valentine</title>
+  <meta name="description" content="A special Valentine experience">
   <style>
-    body{font-family:system-ui,Arial;margin:20px;max-width:960px}
-    img{max-width:100%;height:auto;margin:8px 0}
-    .item{margin-bottom:12px}
-    .meta{font-size:0.9rem;color:#555}
-    .audio-controls{position:fixed;right:12px;bottom:12px;padding:10px;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
-    .audio-controls button{margin-left:8px}
+    :root{
+      --bg:#fff7fb;
+      --accent:#ff5c8a;
+      --muted:#666;
+      --max:900px;
+    }
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial;background:linear-gradient(180deg,#fff7fb 0%, #fff 100%)}
+    .wrap{max-width:var(--max);margin:0 auto;padding:18px}
+    .card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,0.06)}
+    .greeting{font-family:"Playfair Display",serif;color:var(--accent);font-size:1.6rem;margin:8px 0}
+    .sub{color:#444;margin-bottom:12px}
+    .scene{min-height:220px;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:6px}
+    .muted{color:var(--muted)}
+    .nextHint{font-size:0.85rem;color:#999;margin-top:10px}
+    .btnRow{display:flex;gap:12px;justify-content:center;margin-top:12px}
+    .bigBtn{padding:12px 18px;border-radius:999px;border:none;font-weight:700;font-size:1rem;box-shadow:0 6px 20px rgba(0,0,0,0.06)}
+    .yes{background:#ff7aa3;color:#fff}
+    .ab{background:#ffd1e0;color:#9b1550}
+    .fileGallery{display:flex;overflow-x:auto;gap:10px;padding:12px 6px;margin-top:12px}
+    .fileGallery img{height:160px;border-radius:12px;object-fit:cover}
+    .audio-controls{position:fixed;right:12px;bottom:12px;padding:10px;background:#fff;border:1px solid #eee;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.08);display:flex;align-items:center;gap:8px}
+    .credit{font-size:0.9rem;color:#555;margin-top:14px;text-align:center}
+    @media(min-width:720px){
+      .scene{min-height:360px}
+      .fileGallery img{height:220px}
+    }
   </style>
+  <!-- include confetti via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- optional: lottie-player for mascot (if you want Lottie mascots later) -->
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 </head>
 <body>
-  <h1>Shared assets</h1>
-  <div id="content">Loading…</div>
+  <div class="wrap">
+    <div class="card" id="card">
+      <div id="content">
+        <div class="scene" id="scene">
+          <div class="greeting" id="greeting">Loading…</div>
+          <div class="sub" id="sub">Please wait</div>
+          <div class="nextHint" id="hint">Tap to continue</div>
+        </div>
+      </div>
+    </div>
 
-  <div id="audioWidget" style="display:none" class="audio-controls" aria-hidden="true">
-    <span id="audioStatus">Background music</span>
+    <div id="galleryWrap" style="display:none">
+      <div class="fileGallery" id="gallery"></div>
+    </div>
+
+    <div class="credit" id="credit" style="display:none"></div>
+  </div>
+
+  <div id="audioWidget" class="audio-controls" style="display:none">
     <button id="playPauseBtn">Play</button>
-    <label style="margin-left:8px">Volume
-      <input id="volume" type="range" min="0" max="1" step="0.05" value="0.6">
-    </label>
+    <label>Volume <input id="volume" type="range" min="0" max="1" step="0.05" value="0.6"></label>
   </div>
 
   <script>
-    function qsParam(name){
-      const params = new URLSearchParams(location.search);
-      return params.get(name);
-    }
+    // Utility
+    function qsParam(name){ return new URLSearchParams(location.search).get(name); }
+    function el(q){ return document.querySelector(q); }
+    function createEl(tag, attrs){ const e = document.createElement(tag); for(const k in (attrs||{})) e.setAttribute(k, attrs[k]); return e; }
 
     (function(){
-      const content = document.getElementById('content');
       const id = qsParam('share');
-      if (!id) { content.innerHTML = '<p>No share id.</p>'; return; }
-
-      const shareUrl = new URL(`./shares/${id}.json`, location.origin + location.pathname.replace(/\/[^\/]*$/,'/')).href;
-      fetch(shareUrl)
-        .then(r => {
-          if (!r.ok) throw new Error('Share not found (HTTP ' + r.status + ')');
-          return r.json();
-        })
-        .then(share => renderShare(share))
-        .catch(err => {
-          console.error(err);
-          content.innerHTML = '<p>Share not found yet. Please try again in a minute or refresh.</p>';
-        });
-
+      const scene = el('#scene');
+      const greetingEl = el('#greeting');
+      const subEl = el('#sub');
+      const hintEl = el('#hint');
+      const galleryWrap = el('#galleryWrap');
+      const gallery = el('#gallery');
+      const credit = el('#credit');
+      let share = null;
       let audioEl = null;
       let isPlaying = false;
 
-      function renderShare(share){
-        content.innerHTML = '';
-        if (share.files && share.files.length) {
-          for (const f of share.files) {
-            const wrap = document.createElement('div'); wrap.className = 'item';
-            if (f.name && /\.(jpe?g|png|gif|webp|svg|bmp)$/i.test(f.name)) {
-              const img = document.createElement('img'); img.src = f.url; wrap.appendChild(img);
-            } else if (f.name && /\.(mp3|wav|ogg|m4a)$/i.test(f.name)) {
-              const a = document.createElement('audio'); a.controls = true; a.src = f.url; wrap.appendChild(a);
-            } else {
-              const a = document.createElement('a'); a.href = f.url; a.textContent = f.name || f.url; a.target = '_blank'; wrap.appendChild(a);
-            }
+      if (!id) {
+        greetingEl.textContent = 'No share id';
+        subEl.textContent = 'Missing share id in URL';
+        hintEl.style.display = 'none';
+        return;
+      }
 
-            const meta = document.createElement('div'); meta.className = 'meta';
-            const dl = document.createElement('a'); dl.href = f.url; dl.download = f.name || '';
-            dl.textContent = 'Download';
-            meta.appendChild(document.createTextNode((f.name ? f.name + ' ' : '') + '(' + (f.url || '') + ') '));
-            meta.appendChild(dl);
-            wrap.appendChild(meta);
-            content.appendChild(wrap);
+      // Build share URL relative - uses Pages path
+      const shareUrl = new URL(`./shares/${id}.json`, location.origin + location.pathname.replace(/\/[^\/]*$/,'/')).href;
+
+      fetch(shareUrl).then(r=>{
+        if (!r.ok) throw new Error('Share not found (HTTP ' + r.status + ')');
+        return r.json();
+      }).then(s => {
+        share = s;
+        startStory();
+      }).catch(err => {
+        console.error(err);
+        greetingEl.textContent = 'Not published yet';
+        subEl.textContent = 'Please try again in a minute or refresh';
+        hintEl.style.display = 'none';
+      });
+
+      // story steps sequence (simple finite state machine)
+      const steps = ['intro','revealGallery','question','final'];
+      let stepIndex = 0;
+
+      function startStory(){
+        // initial greeting uses receiver & sender
+        const receiver = share.receiver || 'friend';
+        const sender = share.sender || '';
+        greetingEl.textContent = `Hi ${receiver}!`;
+        subEl.innerHTML = `This surprise was made especially for you ❤️`;
+        hintEl.textContent = 'Tap to continue';
+
+        // Prepare gallery but keep hidden until revealGallery
+        if (share.files && share.files.length){
+          gallery.innerHTML = '';
+          for (const f of share.files){
+            if (f.url && /\.(jpe?g|png|gif|webp|svg|bmp)$/i.test(f.name)){
+              const img = createEl('img'); img.src = f.url; img.alt = f.name; gallery.appendChild(img);
+            }
           }
-        } else {
-          content.innerHTML = '<p>No files in share.</p>';
         }
 
-        if (share.background && share.background.url) {
-          setupBackgroundAudio(share.background.url, share.background.name || '');
+        // prepare background audio widget if present
+        if (share.background && share.background.url){
+          setupAudioWidget(share.background.url, share.background.name);
+        }
+
+        // show initial small mascot (optional using lottie) based on theme
+        renderMascot(share.theme || 'rabbit');
+
+        // wire tap/swipe to advance
+        scene.addEventListener('click', advance);
+        // simple swipe detection for mobile (left/right)
+        let touchStartY = null;
+        scene.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; });
+        scene.addEventListener('touchend', e => {
+          const dy = (e.changedTouches[0].clientY - touchStartY);
+          if (Math.abs(dy) > 30){
+            advance();
+          }
+        });
+      }
+
+      function advance(){
+        stepIndex = Math.min(stepIndex + 1, steps.length - 1);
+        renderStep(steps[stepIndex]);
+      }
+
+      function renderStep(step){
+        hintEl.style.display = 'none';
+        switch(step){
+          case 'revealGallery':
+            greetingEl.textContent = share.receiver ? `For ${share.receiver}` : 'A little gallery';
+            subEl.textContent = share.message ? share.message : 'Some memories for you';
+            // show gallery
+            if (gallery.children.length){
+              galleryWrap.style.display = 'block';
+            } else {
+              // skip to question if no gallery
+              renderStep('question');
+              return;
+            }
+            // show hint
+            hintEl.style.display = 'block';
+            hintEl.textContent = 'Tap to continue';
+            break;
+
+          case 'question':
+            greetingEl.textContent = 'Will you be my Valentine?';
+            subEl.textContent = '';
+            // show big buttons
+            showQuestionCard();
+            break;
+
+          case 'final':
+            // reveal final message with credit + confetti
+            showFinal();
+            break;
+
+          default:
+            // keep intro or fallback
+            hintEl.style.display = 'block';
+            hintEl.textContent = 'Tap to continue';
+            break;
         }
       }
 
-      function setupBackgroundAudio(url, name){
+      function showQuestionCard(){
+        // remove gallery hint
+        galleryWrap.style.display = 'none';
+        // create buttons
+        const row = document.createElement('div');
+        row.className = 'btnRow';
+        const yes = document.createElement('button');
+        yes.className = 'bigBtn yes'; yes.textContent = 'YES ❤️';
+        const ab = document.createElement('button');
+        ab.className = 'bigBtn ab'; ab.textContent = 'ABSOLUTELY YES 💖';
+
+        // clear scene and set new nodes
+        subEl.textContent = '';
+        // place buttons in scene
+        // first remove existing controls
+        const existing = scene.querySelector('.btnRow');
+        if (existing) existing.remove();
+        scene.appendChild(row);
+        row.appendChild(yes); row.appendChild(ab);
+
+        // button handlers
+        yes.addEventListener('click', () => { onAnswer('yes'); });
+        ab.addEventListener('click', () => { onAnswer('absolutely'); });
+      }
+
+      function onAnswer(choice){
+        // animate confetti and move to final
+        // run a burst of confetti with hearts-like colors
+        confetti({
+          particleCount: 120,
+          spread: 50,
+          origin: { y: 0.6 },
+          colors: ['#ff7aa3','#ffd1e0','#ff5c8a','#fff2f6']
+        });
+        // play a small audio cue if background exists (optional)
+        // proceed to final after short delay for animation
+        setTimeout(()=>{
+          // advance to final step
+          renderStep('final');
+        }, 800);
+      }
+
+      function showFinal(){
+        // clear scene
+        scene.innerHTML = '';
+        const title = document.createElement('div');
+        title.className = 'greeting';
+        title.textContent = 'With all my love';
+        const line = document.createElement('div');
+        line.className = 'sub';
+        line.textContent = share.message ? share.message : 'Hope this made you smile ❤️';
+        scene.appendChild(title);
+        scene.appendChild(line);
+
+        // show gallery again (if present)
+        if (gallery.children.length){
+          galleryWrap.style.display = 'block';
+        }
+
+        // show credits
+        const senderText = share.sender ? `Sent with love by ${share.sender}` : '';
+        const receiverText = share.receiver ? `For ${share.receiver}` : '';
+        credit.style.display = 'block';
+        credit.innerHTML = `<div>${senderText}</div><div>${receiverText}</div>`;
+
+        // show audio widget (play button) if present (audio widget already prepared)
+        if (share.background && share.background.url){
+          el('#audioWidget').style.display = 'flex';
+        }
+      }
+
+      function setupAudioWidget(url, name){
         audioEl = document.createElement('audio');
         audioEl.src = url;
         audioEl.loop = true;
-        audioEl.volume = 0.6;
         audioEl.preload = 'auto';
+        audioEl.volume = 0.6;
         audioEl.crossOrigin = 'anonymous';
         audioEl.style.display = 'none';
         document.body.appendChild(audioEl);
 
-        const widget = document.getElementById('audioWidget');
-        const playPauseBtn = document.getElementById('playPauseBtn');
-        const audioStatus = document.getElementById('audioStatus');
-        const volume = document.getElementById('volume');
+        const playBtn = el('#playPauseBtn');
+        const volume = el('#volume');
 
-        audioStatus.textContent = (name ? name + ' • ' : '') + 'Background music';
-        widget.style.display = 'block';
-        widget.setAttribute('aria-hidden', 'false');
-
-        // Only play when user presses Play
-        playPauseBtn.addEventListener('click', async () => {
+        playBtn.addEventListener('click', async () => {
           if (!audioEl) return;
-          if (isPlaying) {
+          if (isPlaying){
             audioEl.pause();
             isPlaying = false;
-            playPauseBtn.textContent = 'Play';
+            playBtn.textContent = 'Play';
           } else {
             try {
               await audioEl.play();
               isPlaying = true;
-              playPauseBtn.textContent = 'Pause';
+              playBtn.textContent = 'Pause';
             } catch (err) {
-              console.error('Play failed:', err);
-              alert('Playback blocked or failed. Please try again or check file format/volume.');
+              console.error('Playback failed', err);
+              alert('Playback blocked. Please interact with the page or try again.');
             }
           }
         });
@@ -123,6 +297,36 @@
           audioEl.volume = Number(volume.value);
         });
       }
+
+      function renderMascot(theme){
+        // Minimal mascot placeholder: a small svg or Lottie can be used. For now we show a subtle emoji or Lottie tag.
+        const mascotWrap = document.createElement('div');
+        mascotWrap.style.position = 'absolute';
+        mascotWrap.style.right = '20px';
+        mascotWrap.style.top = '20px';
+        mascotWrap.style.opacity = '0.9';
+        if (theme === 'hamster'){
+          const elL = document.createElement('div');
+          elL.textContent = '🐹';
+          elL.style.fontSize = '36px';
+          mascotWrap.appendChild(elL);
+        } else if (theme === 'rabbit'){
+          const elL = document.createElement('div');
+          elL.textContent = '🐰';
+          elL.style.fontSize = '38px';
+          mascotWrap.appendChild(elL);
+        } else {
+          const elL = document.createElement('div');
+          elL.textContent = '💖';
+          elL.style.fontSize = '36px';
+          mascotWrap.appendChild(elL);
+        }
+        // attach to card
+        const card = el('#card');
+        card.style.position = 'relative';
+        card.appendChild(mascotWrap);
+      }
+
     })();
   </script>
 </body>
