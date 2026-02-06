@@ -87,7 +87,7 @@
       width:200%;
       height:200%;
       background: radial-gradient(circle, rgba(212,86,127,0.03) 0%, transparent 70%);
-      animation: shimmer 8s infinite;
+      animation: shimmer 12s infinite;
     }
     
     @keyframes shimmer {
@@ -114,7 +114,7 @@
       margin:0 0 20px;
       opacity:0;
       transform:translateY(20px);
-      animation:fadeSlideIn 1.2s forwards 0.5s;
+      animation:fadeSlideIn 1.8s forwards 0.8s;
       text-shadow: 2px 2px 4px rgba(212,86,127,0.1);
       line-height:1.2;
     }
@@ -126,7 +126,7 @@
       opacity:0;
       font-weight:400;
       line-height:1.6;
-      animation:fadeSlideIn 1.2s forwards 0.8s;
+      animation:fadeSlideIn 1.8s forwards 1.2s;
     }
     
     .love-quote {
@@ -139,7 +139,7 @@
       border-left:3px solid var(--rose);
       border-right:3px solid var(--rose);
       opacity:0;
-      animation:fadeSlideIn 1.2s forwards 1.1s;
+      animation:fadeSlideIn 1.8s forwards 1.6s;
       line-height:1.8;
     }
     
@@ -155,7 +155,7 @@
       color:var(--rose);
       margin-top:30px;
       opacity:0;
-      animation:pulse 2s infinite, fadeSlideIn 1.2s forwards 1.4s;
+      animation:pulse 3s infinite, fadeSlideIn 1.8s forwards 2s;
       font-style:italic;
     }
     
@@ -176,6 +176,66 @@
       perspective:1000px;
     }
     
+    /* Single image display in center */
+    .single-image-view {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      min-height:500px;
+      padding:40px 20px;
+    }
+    
+    .single-image-container {
+      background:#fff;
+      border-radius:20px;
+      padding:25px;
+      box-shadow:0 20px 60px rgba(212,86,127,0.3);
+      max-width:90%;
+      opacity:0;
+      transform:scale(0.9) translateY(30px);
+      animation:singleImageAppear 1.5s forwards;
+    }
+    
+    @keyframes singleImageAppear {
+      to {
+        opacity:1;
+        transform:scale(1) translateY(0);
+      }
+    }
+    
+    .single-image-container img {
+      width:100%;
+      height:auto;
+      max-height:450px;
+      object-fit:contain;
+      display:block;
+      border-radius:12px;
+      margin-bottom:20px;
+    }
+    
+    .single-image-container.landscape img {
+      max-width:550px;
+      max-height:380px;
+    }
+    
+    .single-image-container.portrait img {
+      max-width:320px;
+      max-height:500px;
+    }
+    
+    .single-image-container .image-caption {
+      font-family:'Cormorant Garamond',serif;
+      font-style:italic;
+      font-size:1.2rem;
+      color:var(--deep-rose);
+      text-align:center;
+      line-height:1.6;
+      padding:0 10px;
+      opacity:0;
+      animation:fadeSlideIn 1.2s forwards 0.8s;
+    }
+    
     .gallery-item {
       position:absolute;
       background:#fff;
@@ -184,39 +244,39 @@
       box-shadow:0 20px 60px rgba(212,86,127,0.25);
       opacity:0;
       transform:scale(0.8) translateY(50px);
-      animation:cardStack 0.8s forwards;
-      transition:transform 0.3s ease;
+      animation:cardStack 1.2s forwards;
+      transition:transform 0.5s ease;
       max-width:90%;
     }
     
     /* Stagger the cards with different positions and rotations */
     .gallery-item:nth-child(1) { 
-      animation-delay: 0.2s; 
+      animation-delay: 0.3s; 
       z-index:1;
       transform:rotate(-8deg) translateY(40px);
     }
     .gallery-item:nth-child(2) { 
-      animation-delay: 0.4s; 
+      animation-delay: 0.6s; 
       z-index:2;
       transform:rotate(-4deg) translateY(20px);
     }
     .gallery-item:nth-child(3) { 
-      animation-delay: 0.6s; 
+      animation-delay: 0.9s; 
       z-index:3;
       transform:rotate(0deg) translateY(0px);
     }
     .gallery-item:nth-child(4) { 
-      animation-delay: 0.8s; 
+      animation-delay: 1.2s; 
       z-index:4;
       transform:rotate(4deg) translateY(-20px);
     }
     .gallery-item:nth-child(5) { 
-      animation-delay: 1s; 
+      animation-delay: 1.5s; 
       z-index:5;
       transform:rotate(8deg) translateY(-40px);
     }
     .gallery-item:nth-child(6) { 
-      animation-delay: 1.2s; 
+      animation-delay: 1.8s; 
       z-index:6;
       transform:rotate(-6deg) translateY(-60px);
     }
@@ -281,7 +341,7 @@
     .fileGallery.final-grid .gallery-item {
       position:static;
       transform:none !important;
-      animation:galleryItemAppear 0.6s forwards;
+      animation:galleryItemAppear 1s forwards;
       max-width:100%;
     }
     
@@ -339,7 +399,7 @@
       justify-content:center;
       margin-top:40px;
       opacity:0;
-      animation:fadeSlideIn 1s forwards 0.5s;
+      animation:fadeSlideIn 1.5s forwards 0.8s;
     }
     
     .bigBtn{
@@ -412,7 +472,7 @@
       gap:12px;
       z-index:100;
       opacity:0;
-      animation:fadeSlideIn 1s forwards 2s;
+      animation:fadeSlideIn 1.5s forwards 3s;
     }
     
     .audio-controls button {
@@ -451,7 +511,7 @@
       text-align:center;
       line-height:1.8;
       opacity:0;
-      animation:fadeSlideIn 1s forwards 0.5s;
+      animation:fadeSlideIn 1.5s forwards 0.8s;
     }
     
     .credit div {
@@ -465,7 +525,7 @@
       right:30px;
       top:30px;
       opacity:0;
-      animation:mascotBounce 1.5s forwards 1.5s, float 3s infinite ease-in-out 3s;
+      animation:mascotBounce 2s forwards 2s, float 4s infinite ease-in-out 4s;
       font-size:50px;
       filter:drop-shadow(0 4px 8px rgba(212,86,127,0.2));
     }
@@ -511,6 +571,34 @@
       .love-quote{ font-size:1.2rem; padding:15px; }
       .scene{ min-height:300px; padding:10px; }
       .card{ padding:30px 20px; }
+      
+      .single-image-view {
+        min-height:400px;
+        padding:30px 10px;
+      }
+      
+      .single-image-container {
+        padding:20px;
+        max-width:95%;
+      }
+      
+      .single-image-container img {
+        max-height:400px;
+      }
+      
+      .single-image-container.landscape img {
+        max-width:100%;
+        max-height:320px;
+      }
+      
+      .single-image-container.portrait img {
+        max-width:280px;
+        max-height:420px;
+      }
+      
+      .single-image-container .image-caption {
+        font-size:1rem;
+      }
       
       .fileGallery{ 
         min-height:400px;
@@ -648,8 +736,10 @@
         hintEl.style.display = 'none';
       });
 
-      const steps = ['intro','quote1','revealGallery','quote2','question','final'];
+      const steps = ['intro','quote1','images','question','final'];
       let stepIndex = 0;
+      let currentImageIndex = 0;
+      let imageFiles = [];
 
       function startStory(){
         const receiver = share.receiver || 'friend';
@@ -657,8 +747,8 @@
         subEl.innerHTML = `This surprise was made especially for you ❤️`;
         hintEl.textContent = '✨ Tap to continue ✨';
 
+        // Store image files for later display
         if (share.files && share.files.length){
-          gallery.innerHTML = '';
           const captions = [
             "This moment means everything",
             "You make my heart smile",
@@ -673,30 +763,12 @@
           let captionIndex = 0;
           for (const f of share.files){
             if (f.url && /\.(jpe?g|png|gif|webp|svg|bmp)$/i.test(f.name)){
-              const item = createEl('div');
-              item.className = 'gallery-item';
-              
-              const img = createEl('img'); 
-              img.src = f.url; 
-              img.alt = f.name;
-              
-              // Detect image orientation after load
-              img.onload = function() {
-                if (this.naturalWidth > this.naturalHeight) {
-                  item.classList.add('landscape');
-                } else {
-                  item.classList.add('portrait');
-                }
-              };
-              
-              const caption = createEl('div');
-              caption.className = 'image-caption';
-              caption.textContent = captions[captionIndex % captions.length];
+              imageFiles.push({
+                url: f.url,
+                name: f.name,
+                caption: captions[captionIndex % captions.length]
+              });
               captionIndex++;
-              
-              item.appendChild(img);
-              item.appendChild(caption);
-              gallery.appendChild(item);
             }
           }
         }
@@ -720,69 +792,42 @@
       }
 
       function advance(){
-        stepIndex = Math.min(stepIndex + 1, steps.length - 1);
-        renderStep(steps[stepIndex]);
+        // If we're in images step and haven't shown all images yet
+        if (steps[stepIndex] === 'images' && currentImageIndex < imageFiles.length) {
+          showNextImage();
+        } else {
+          stepIndex = Math.min(stepIndex + 1, steps.length - 1);
+          renderStep(steps[stepIndex]);
+        }
       }
 
       function renderStep(step){
         hintEl.style.display = 'none';
-        
-        // Reset animations by recreating elements
-        const oldGreeting = greetingEl.textContent;
-        const oldSub = subEl.textContent;
+        galleryWrap.style.display = 'none';
         
         switch(step){
           case 'quote1':
-            greetingEl.textContent = '';
-            subEl.textContent = '';
+            scene.innerHTML = '';
             const quote1 = createEl('div');
             quote1.className = 'love-quote';
             quote1.textContent = `"${loveQuotes[Math.floor(Math.random() * loveQuotes.length)]}"`;
-            scene.innerHTML = '';
             scene.appendChild(quote1);
             setTimeout(() => {
               hintEl.style.display = 'block';
               hintEl.textContent = '✨ Tap to continue ✨';
               scene.appendChild(hintEl);
-            }, 1500);
+            }, 2500);
             break;
 
-          case 'revealGallery':
-            scene.innerHTML = '';
-            const g1 = createEl('div');
-            g1.className = 'greeting';
-            g1.textContent = share.receiver ? `For ${share.receiver}` : 'Our Precious Moments';
-            const s1 = createEl('div');
-            s1.className = 'sub';
-            s1.textContent = share.message ? share.message : 'Every moment with you is a treasure';
-            scene.appendChild(g1);
-            scene.appendChild(s1);
-            
-            if (gallery.children.length){
-              galleryWrap.style.display = 'block';
-              setTimeout(() => {
-                hintEl.style.display = 'block';
-                hintEl.textContent = '✨ Tap to continue ✨';
-                scene.appendChild(hintEl);
-              }, 2000);
+          case 'images':
+            if (imageFiles.length > 0) {
+              currentImageIndex = 0;
+              showNextImage();
             } else {
-              renderStep('quote2');
-              return;
+              // Skip to question if no images
+              stepIndex++;
+              renderStep('question');
             }
-            break;
-
-          case 'quote2':
-            galleryWrap.style.display = 'none';
-            scene.innerHTML = '';
-            const quote2 = createEl('div');
-            quote2.className = 'love-quote';
-            quote2.textContent = '"I love us"';
-            scene.appendChild(quote2);
-            setTimeout(() => {
-              hintEl.style.display = 'block';
-              hintEl.textContent = '✨ Tap to continue ✨';
-              scene.appendChild(hintEl);
-            }, 1500);
             break;
 
           case 'question':
@@ -799,7 +844,9 @@
             qSub.textContent = '"Every day with you is Valentine\'s Day"';
             scene.appendChild(qSub);
             
-            showQuestionCard();
+            setTimeout(() => {
+              showQuestionCard();
+            }, 1500);
             break;
 
           case 'final':
@@ -811,6 +858,58 @@
             hintEl.textContent = '✨ Tap to continue ✨';
             break;
         }
+      }
+
+      function showNextImage(){
+        if (currentImageIndex >= imageFiles.length) {
+          return;
+        }
+
+        scene.innerHTML = '';
+        galleryWrap.style.display = 'none';
+
+        const imageData = imageFiles[currentImageIndex];
+        const container = createEl('div');
+        container.className = 'single-image-view';
+        
+        const imageCard = createEl('div');
+        imageCard.className = 'single-image-container';
+        
+        const img = createEl('img');
+        img.src = imageData.url;
+        img.alt = imageData.name;
+        
+        // Detect orientation after load
+        img.onload = function() {
+          if (this.naturalWidth > this.naturalHeight) {
+            imageCard.classList.add('landscape');
+          } else {
+            imageCard.classList.add('portrait');
+          }
+        };
+        
+        const caption = createEl('div');
+        caption.className = 'image-caption';
+        caption.textContent = imageData.caption;
+        
+        imageCard.appendChild(img);
+        imageCard.appendChild(caption);
+        container.appendChild(imageCard);
+        
+        scene.innerHTML = '';
+        scene.appendChild(container);
+        
+        currentImageIndex++;
+        
+        // Show hint after animation completes
+        setTimeout(() => {
+          const hint = createEl('div');
+          hint.className = 'nextHint';
+          hint.textContent = currentImageIndex < imageFiles.length 
+            ? '✨ Tap for next moment ✨' 
+            : '✨ Tap to continue ✨';
+          scene.appendChild(hint);
+        }, 2500);
       }
 
       function showQuestionCard(){
@@ -885,12 +984,38 @@
         scene.appendChild(quote);
         scene.appendChild(line);
 
-        if (gallery.children.length){
+        // Populate gallery for final display
+        if (imageFiles.length > 0){
           setTimeout(() => {
-            // Switch gallery to grid layout for final page
+            gallery.innerHTML = '';
+            imageFiles.forEach(imgData => {
+              const item = createEl('div');
+              item.className = 'gallery-item';
+              
+              const img = createEl('img'); 
+              img.src = imgData.url; 
+              img.alt = imgData.name;
+              
+              img.onload = function() {
+                if (this.naturalWidth > this.naturalHeight) {
+                  item.classList.add('landscape');
+                } else {
+                  item.classList.add('portrait');
+                }
+              };
+              
+              const caption = createEl('div');
+              caption.className = 'image-caption';
+              caption.textContent = imgData.caption;
+              
+              item.appendChild(img);
+              item.appendChild(caption);
+              gallery.appendChild(item);
+            });
+            
             gallery.classList.add('final-grid');
             galleryWrap.style.display = 'block';
-          }, 1000);
+          }, 1500);
         }
 
         const senderText = share.sender ? `Sent with all my heart by ${share.sender}` : '';
