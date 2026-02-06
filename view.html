@@ -164,35 +164,130 @@
       50% { opacity: 1; transform: scale(1.05); }
     }
     
-    /* Gallery styles */
+    /* Gallery styles - Stacked Card Effect */
     .fileGallery{
+      position:relative;
+      min-height:500px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:60px 20px;
+      margin-top:20px;
+      perspective:1000px;
+    }
+    
+    .gallery-item {
+      position:absolute;
+      background:#fff;
+      border-radius:20px;
+      padding:20px;
+      box-shadow:0 20px 60px rgba(212,86,127,0.25);
+      opacity:0;
+      transform:scale(0.8) translateY(50px);
+      animation:cardStack 0.8s forwards;
+      transition:transform 0.3s ease;
+      max-width:90%;
+    }
+    
+    /* Stagger the cards with different positions and rotations */
+    .gallery-item:nth-child(1) { 
+      animation-delay: 0.2s; 
+      z-index:1;
+      transform:rotate(-8deg) translateY(40px);
+    }
+    .gallery-item:nth-child(2) { 
+      animation-delay: 0.4s; 
+      z-index:2;
+      transform:rotate(-4deg) translateY(20px);
+    }
+    .gallery-item:nth-child(3) { 
+      animation-delay: 0.6s; 
+      z-index:3;
+      transform:rotate(0deg) translateY(0px);
+    }
+    .gallery-item:nth-child(4) { 
+      animation-delay: 0.8s; 
+      z-index:4;
+      transform:rotate(4deg) translateY(-20px);
+    }
+    .gallery-item:nth-child(5) { 
+      animation-delay: 1s; 
+      z-index:5;
+      transform:rotate(8deg) translateY(-40px);
+    }
+    .gallery-item:nth-child(6) { 
+      animation-delay: 1.2s; 
+      z-index:6;
+      transform:rotate(-6deg) translateY(-60px);
+    }
+    
+    @keyframes cardStack {
+      to {
+        opacity:1;
+        transform:inherit;
+      }
+    }
+    
+    .gallery-item:hover {
+      transform:scale(1.05) !important;
+      z-index:100 !important;
+      box-shadow:0 30px 80px rgba(212,86,127,0.35);
+    }
+    
+    .gallery-item img{
+      width:100%;
+      height:auto;
+      max-height:400px;
+      object-fit:cover;
+      display:block;
+      border-radius:12px;
+      margin-bottom:15px;
+    }
+    
+    /* Landscape images */
+    .gallery-item.landscape img {
+      max-width:500px;
+      max-height:350px;
+    }
+    
+    /* Portrait images */
+    .gallery-item.portrait img {
+      max-width:300px;
+      max-height:450px;
+    }
+    
+    .image-caption {
+      font-family:'Cormorant Garamond',serif;
+      font-style:italic;
+      font-size:1.1rem;
+      color:var(--deep-rose);
+      text-align:center;
+      line-height:1.6;
+      padding:0 10px;
+    }
+    
+    /* Final page grid layout */
+    .fileGallery.final-grid{
       display:grid;
       grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
       gap:20px;
       padding:30px 0;
       margin-top:20px;
+      min-height:auto;
+      position:static;
+      perspective:none;
     }
     
-    .gallery-item {
-      position:relative;
-      overflow:hidden;
-      border-radius:20px;
-      box-shadow:0 10px 30px rgba(212,86,127,0.2);
-      opacity:0;
-      transform:scale(0.8) rotate(-5deg);
+    .fileGallery.final-grid .gallery-item {
+      position:static;
+      transform:none !important;
       animation:galleryItemAppear 0.6s forwards;
+      max-width:100%;
     }
     
-    .gallery-item:nth-child(even) {
-      transform:scale(0.8) rotate(5deg);
+    .fileGallery.final-grid .gallery-item:hover {
+      transform:scale(1.05) !important;
     }
-    
-    .gallery-item:nth-child(1) { animation-delay: 0.2s; }
-    .gallery-item:nth-child(2) { animation-delay: 0.4s; }
-    .gallery-item:nth-child(3) { animation-delay: 0.6s; }
-    .gallery-item:nth-child(4) { animation-delay: 0.8s; }
-    .gallery-item:nth-child(5) { animation-delay: 1s; }
-    .gallery-item:nth-child(6) { animation-delay: 1.2s; }
     
     @keyframes galleryItemAppear {
       to {
@@ -201,7 +296,7 @@
       }
     }
     
-    .gallery-item::before {
+    .fileGallery.final-grid .gallery-item::before {
       content:'';
       position:absolute;
       top:0;
@@ -212,22 +307,28 @@
       opacity:0;
       transition:opacity 0.3s;
       z-index:1;
+      border-radius:20px;
     }
     
-    .gallery-item:hover::before {
+    .fileGallery.final-grid .gallery-item:hover::before {
       opacity:1;
     }
     
-    .gallery-item img{
+    .fileGallery.final-grid .gallery-item img{
       width:100%;
       height:300px;
+      max-height:300px;
+      max-width:100%;
       object-fit:cover;
-      display:block;
       transition:transform 0.5s ease;
     }
     
-    .gallery-item:hover img {
+    .fileGallery.final-grid .gallery-item:hover img {
       transform:scale(1.1);
+    }
+    
+    .fileGallery.final-grid .image-caption {
+      display:none;
     }
     
     /* Question buttons */
@@ -410,8 +511,39 @@
       .love-quote{ font-size:1.2rem; padding:15px; }
       .scene{ min-height:300px; padding:10px; }
       .card{ padding:30px 20px; }
-      .fileGallery{ grid-template-columns:1fr; gap:15px; }
-      .gallery-item img{ height:250px; }
+      
+      .fileGallery{ 
+        min-height:400px;
+        padding:40px 10px;
+      }
+      
+      .gallery-item {
+        max-width:85%;
+      }
+      
+      .gallery-item.landscape img {
+        max-width:100%;
+        max-height:280px;
+      }
+      
+      .gallery-item.portrait img {
+        max-width:240px;
+        max-height:380px;
+      }
+      
+      .image-caption {
+        font-size:1rem;
+      }
+      
+      .fileGallery.final-grid{ 
+        grid-template-columns:1fr; 
+        gap:15px; 
+      }
+      
+      .fileGallery.final-grid .gallery-item img{ 
+        height:250px; 
+      }
+      
       .mascot-wrap{ font-size:35px; right:15px; top:15px; }
       .audio-controls{ right:10px; bottom:10px; padding:10px 15px; }
       .audio-controls label{ font-size:0.8rem; }
@@ -527,14 +659,43 @@
 
         if (share.files && share.files.length){
           gallery.innerHTML = '';
+          const captions = [
+            "This moment means everything",
+            "You make my heart smile",
+            "Forever grateful for you",
+            "My favorite memory with you",
+            "You are my happy place",
+            "Every moment is better with you",
+            "This is where my heart lives",
+            "You complete my story"
+          ];
+          
+          let captionIndex = 0;
           for (const f of share.files){
             if (f.url && /\.(jpe?g|png|gif|webp|svg|bmp)$/i.test(f.name)){
               const item = createEl('div');
               item.className = 'gallery-item';
+              
               const img = createEl('img'); 
               img.src = f.url; 
               img.alt = f.name;
+              
+              // Detect image orientation after load
+              img.onload = function() {
+                if (this.naturalWidth > this.naturalHeight) {
+                  item.classList.add('landscape');
+                } else {
+                  item.classList.add('portrait');
+                }
+              };
+              
+              const caption = createEl('div');
+              caption.className = 'image-caption';
+              caption.textContent = captions[captionIndex % captions.length];
+              captionIndex++;
+              
               item.appendChild(img);
+              item.appendChild(caption);
               gallery.appendChild(item);
             }
           }
@@ -726,6 +887,8 @@
 
         if (gallery.children.length){
           setTimeout(() => {
+            // Switch gallery to grid layout for final page
+            gallery.classList.add('final-grid');
             galleryWrap.style.display = 'block';
           }, 1000);
         }
