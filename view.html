@@ -699,7 +699,7 @@
       for(let i = 0; i < 15; i++) {
         const heart = document.createElement('div');
         heart.className = 'heart-float';
-        heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+        heart.textContent = hearts[Math.floor(Math.random() * hearts.hearts.length)];
         heart.style.left = Math.random() * 100 + '%';
         heart.style.animationDelay = Math.random() * 15 + 's';
         heart.style.fontSize = (15 + Math.random() * 20) + 'px';
@@ -1038,7 +1038,7 @@
           fullscreenYesBtn.remove();
         }
         
-        // Multiple confetti bursts
+        // Multiple confetti bursts (PINK FLARES!)
         const duration = 3000;
         const end = Date.now() + duration;
         const colors = ['#d4567f','#ffd1e0','#ff5c8a','#fff2f6','#d4a574'];
@@ -1071,28 +1071,24 @@
         scene.innerHTML = '';
         galleryWrap.style.display = 'none';
         
-        // If user clicked "No" before, show the special message first
-        if (noClickCount > 0) {
-          const knewMessage = document.createElement('div');
-          knewMessage.className = 'love-quote';
-          knewMessage.style.fontSize = '1.5rem';
-          knewMessage.textContent = 'I knew you would say yes! 💕';
-          scene.appendChild(knewMessage);
-          
-          const tapHint = document.createElement('div');
-          tapHint.className = 'nextHint';
-          tapHint.textContent = '✨ Tap to continue ✨';
-          scene.appendChild(tapHint);
-          
-          // Add one-time click listener to continue to the actual final message
-          const continueToFinal = () => {
-            scene.removeEventListener('click', continueToFinal);
-            showActualFinal();
-          };
-          scene.addEventListener('click', continueToFinal);
-        } else {
+        // ALWAYS show "I knew you would say yes!" message for BOTH cases
+        const knewMessage = document.createElement('div');
+        knewMessage.className = 'love-quote';
+        knewMessage.style.fontSize = '1.5rem';
+        knewMessage.textContent = 'I knew you would say yes! 💕';
+        scene.appendChild(knewMessage);
+        
+        const tapHint = document.createElement('div');
+        tapHint.className = 'nextHint';
+        tapHint.textContent = '✨ Tap to continue ✨';
+        scene.appendChild(tapHint);
+        
+        // Add one-time click listener to continue to the actual final message
+        const continueToFinal = () => {
+          scene.removeEventListener('click', continueToFinal);
           showActualFinal();
-        }
+        };
+        scene.addEventListener('click', continueToFinal);
       }
       
       function showActualFinal() {
@@ -1110,7 +1106,7 @@
         const line = document.createElement('div');
         line.className = 'sub';
         line.style.marginTop = '20px';
-        line.textContent = share.message ? share.message : 'Forever grateful for you ❤��';
+        line.textContent = share.message ? share.message : 'Forever grateful for you ❤️';
         
         scene.appendChild(title);
         scene.appendChild(quote);
