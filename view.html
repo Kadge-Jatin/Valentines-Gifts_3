@@ -812,7 +812,12 @@
         });
       }
 
-      function advance(){
+      function advance(event){
+        // Don't advance if clicking on a button during question phase
+        if (event && event.target && (event.target.classList.contains('bigBtn') || event.target.closest('.btnRow'))) {
+          return;
+        }
+        
         // If we're in images step and haven't shown all images yet
         if (steps[stepIndex] === 'images' && currentImageIndex < imageFiles.length) {
           showNextImage();
@@ -955,11 +960,13 @@
         row.appendChild(yes); 
         row.appendChild(no);
 
-        yes.addEventListener('click', () => { onAnswer('yes'); });
-        no.addEventListener('click', handleNoClick);
+        yes.addEventListener('click', (e) => { onAnswer('yes', e); });
+        no.addEventListener('click', (e) => { handleNoClick(e); });
       }
       
-      function handleNoClick() {
+      function handleNoClick(event) {
+        event.stopPropagation();
+        event.preventDefault();
         noClickCount++;
         const yesBtn = document.getElementById('yesBtn');
         const noBtn = document.getElementById('noBtn');
@@ -1005,7 +1012,12 @@
         }
       }
 
-      function onAnswer(choice){
+      function onAnswer(choice, event){
+        if (event) {
+          event.stopPropagation();
+          event.preventDefault();
+        }
+        
         // Show "I knew you'd say yes" message
         if (noClickCount > 0) {
           const yesMessage = document.createElement('div');
