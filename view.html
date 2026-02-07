@@ -1027,18 +1027,28 @@
           event.preventDefault();
         }
         
-        // Proceed to confetti and final page
-        proceedAfterYes();
+        // IMMEDIATELY show "I knew you would say yes!" page, THEN start confetti
+        showKnewYouWouldSayYes();
       }
       
-      function proceedAfterYes() {
-        // CRITICAL FIX: Remove the fullscreen Yes button if it exists
+      function showKnewYouWouldSayYes() {
+        // Remove the fullscreen Yes button if it exists
         const fullscreenYesBtn = document.getElementById('yesBtn');
         if (fullscreenYesBtn && fullscreenYesBtn.parentNode === document.body) {
           fullscreenYesBtn.remove();
         }
         
-        // Multiple confetti bursts (PINK FLARES!)
+        // Clear the scene and show "I knew you would say yes!" message
+        scene.innerHTML = '';
+        galleryWrap.style.display = 'none';
+        
+        const knewMessage = document.createElement('div');
+        knewMessage.className = 'love-quote';
+        knewMessage.style.fontSize = '1.5rem';
+        knewMessage.textContent = 'I knew you would say yes! 💕';
+        scene.appendChild(knewMessage);
+        
+        // Start confetti on THIS page
         const duration = 3000;
         const end = Date.now() + duration;
         const colors = ['#d4567f','#ffd1e0','#ff5c8a','#fff2f6','#d4a574'];
@@ -1064,31 +1074,26 @@
           }
         }());
         
-        setTimeout(()=>{ renderStep('final'); }, 3000);
+        // After confetti, show "Tap to continue" hint
+        setTimeout(() => {
+          const tapHint = document.createElement('div');
+          tapHint.className = 'nextHint';
+          tapHint.textContent = '✨ Tap to continue ✨';
+          scene.appendChild(tapHint);
+          
+          // Add one-time click listener to continue to the actual final message
+          const continueToFinal = () => {
+            scene.removeEventListener('click', continueToFinal);
+            showActualFinal();
+          };
+          scene.addEventListener('click', continueToFinal);
+        }, 3000);
       }
 
       function showFinal(){
-        scene.innerHTML = '';
-        galleryWrap.style.display = 'none';
-        
-        // ONLY CHANGE: ALWAYS show "I knew you would say yes!" for BOTH cases
-        const knewMessage = document.createElement('div');
-        knewMessage.className = 'love-quote';
-        knewMessage.style.fontSize = '1.5rem';
-        knewMessage.textContent = 'I knew you would say yes! 💕';
-        scene.appendChild(knewMessage);
-        
-        const tapHint = document.createElement('div');
-        tapHint.className = 'nextHint';
-        tapHint.textContent = '✨ Tap to continue ✨';
-        scene.appendChild(tapHint);
-        
-        // Add one-time click listener to continue to the actual final message
-        const continueToFinal = () => {
-          scene.removeEventListener('click', continueToFinal);
-          showActualFinal();
-        };
-        scene.addEventListener('click', continueToFinal);
+        // This function is no longer called directly from question
+        // It's now called showKnewYouWouldSayYes first
+        showKnewYouWouldSayYes();
       }
       
       function showActualFinal() {
