@@ -16,8 +16,6 @@
       --cream:#fff9fc;
       --gold:#d4a574;
       --shadow:rgba(212,86,127,0.15);
-      --pop-duration:520ms;
-      --pop-ease:cubic-bezier(.2,.9,.25,1);
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html,body{
@@ -238,32 +236,6 @@
       animation:fadeSlideIn 0.5s forwards 0.3s;
     }
     
-    /* --- POP IN / OUT ANIMATION (smooth) --- */
-    @keyframes popIn {
-      0% { transform: scale(0.88) translateY(28px); opacity: 0; filter: blur(6px); }
-      60% { transform: scale(1.04) translateY(-6px); opacity: 1; filter: blur(0); }
-      100% { transform: scale(1) translateY(0); opacity: 1; filter: none; }
-    }
-    @keyframes popOut {
-      0% { transform: scale(1) translateY(0); opacity: 1; filter: none; }
-      100% { transform: scale(0.9) translateY(24px); opacity: 0; filter: blur(4px); }
-    }
-    .single-image-container.pop-enter {
-      animation: popIn var(--pop-duration) var(--pop-ease) forwards;
-    }
-    .single-image-container.pop-exit {
-      animation: popOut 360ms ease forwards;
-    }
-    .single-image-container .image-caption { transition: opacity 300ms ease; }
-    @media (prefers-reduced-motion: reduce) {
-      .single-image-container.pop-enter,
-      .single-image-container.pop-exit {
-        animation: none !important;
-        transition: none !important;
-      }
-    }
-    /* --- end pop animations --- */
-
     .gallery-item {
       position:absolute;
       background:#fff;
@@ -422,12 +394,13 @@
     /* Question buttons */
     .btnRow{
       display:flex;
-      flex-direction:column;
+      flex-direction:row;
       gap:20px;
       justify-content:center;
       margin-top:40px;
       opacity:0;
       animation:fadeSlideIn 0.8s forwards 0.3s;
+      align-items:center;
     }
     
     .bigBtn{
@@ -471,6 +444,17 @@
     .yes:hover{
       transform:scale(1.05) translateY(-2px);
       box-shadow:0 15px 40px rgba(212,86,127,0.4);
+    }
+    
+    .no{
+      background:linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 100%);
+      color:#666;
+      transform:scale(1);
+    }
+    
+    .no:hover{
+      transform:scale(1.05) translateY(-2px);
+      box-shadow:0 15px 40px rgba(150,150,150,0.3);
     }
     
     .ab{
@@ -599,6 +583,15 @@
       .love-quote{ font-size:1.2rem; padding:15px; }
       .scene{ min-height:300px; padding:10px; }
       .card{ padding:30px 20px; }
+      
+      .btnRow{
+        flex-direction:column;
+        gap:15px;
+      }
+      
+      .bigBtn{
+        width:100%;
+      }
       
       .single-image-view {
         min-height:400px;
@@ -884,112 +877,155 @@
         }
       }
 
-      // Helper: preload image and get orientation metadata
-      function preloadImage(url) {
-        return new Promise((resolve, reject) => {
-          const img = new Image();
-          img.crossOrigin = 'anonymous';
-          img.onload = () => {
-            resolve({ width: img.naturalWidth || img.width, height: img.naturalHeight || img.height, url });
-          };
-          img.onerror = (e) => reject(e);
-          img.src = url;
-        });
-      }
+      function showNextImage(){
+        if (currentImageIndex >= imageFiles.length) {
+          return;
+        }
 
-      // Smooth showNextImage: preload, insert off-DOM, animate pop-in, animate old out
-      async function showNextImage(){
-        if (currentImageIndex >= imageFiles.length) return;
+        scene.innerHTML = '';
+        galleryWrap.style.display = 'none';
 
         const imageData = imageFiles[currentImageIndex];
-
-        // preload image
-        let meta;
-        try {
-          meta = await preloadImage(imageData.url);
-        } catch (err) {
-          console.warn('Image preload failed', err);
-          meta = { width: 1000, height: 700, url: imageData.url };
-        }
-
-        // create new container off-DOM
-        const newContainer = createEl('div');
-        newContainer.className = 'single-image-container';
-        if (meta.width > meta.height) newContainer.classList.add('landscape');
-        else newContainer.classList.add('portrait');
-
+        const container = createEl('div');
+        container.className = 'single-image-view';
+        
+        const imageCard = createEl('div');
+        imageCard.className = 'single-image-container';
+        
         const img = createEl('img');
-        img.src = meta.url;
-        img.alt = imageData.name || '';
-
+        img.src = imageData.url;
+        img.alt = imageData.name;
+        
+        // Detect orientation after load
+        img.onload = function() {
+          if (this.naturalWidth > this.naturalHeight) {
+            imageCard.classList.add('landscape');
+          } else {
+            imageCard.classList.add('portrait');
+          }
+        };
+        
         const caption = createEl('div');
         caption.className = 'image-caption';
-        caption.textContent = imageData.caption || '';
-
-        newContainer.appendChild(img);
-        newContainer.appendChild(caption);
-
-        // capture any existing container to animate out
-        const oldContainer = scene.querySelector('.single-image-container');
-
-        // replace scene content with new wrapper to avoid layout jumps
+        caption.textContent = imageData.caption;
+        
+        imageCard.appendChild(img);
+        imageCard.appendChild(caption);
+        container.appendChild(imageCard);
+        
         scene.innerHTML = '';
-        const wrapper = createEl('div');
-        wrapper.className = 'single-image-view';
-        wrapper.appendChild(newContainer);
-        scene.appendChild(wrapper);
-
-        // force reflow then add enter class to trigger pop-in
-        newContainer.offsetHeight; // force reflow
-        newContainer.classList.add('pop-enter');
-
+        scene.appendChild(container);
+        
         currentImageIndex++;
-
-        // attach hint below the image
+        
+        // Show hint immediately
         const hint = createEl('div');
         hint.className = 'nextHint';
-        hint.textContent = currentImageIndex < imageFiles.length ? '✨ Tap for next moment ✨' : '✨ Tap to continue ✨';
+        hint.textContent = currentImageIndex < imageFiles.length 
+          ? '✨ Tap for next moment ✨' 
+          : '✨ Tap to continue ✨';
         scene.appendChild(hint);
-
-        // animate old container out if present (in case it exists from previous state)
-        if (oldContainer) {
-          // ensure old container has pop-exit animation
-          oldContainer.classList.remove('pop-enter');
-          oldContainer.classList.add('pop-exit');
-          oldContainer.addEventListener('animationend', () => {
-            try { if (oldContainer && oldContainer.parentNode) oldContainer.parentNode.removeChild(oldContainer); } catch(e){}
-          }, { once: true });
-        }
-
-        // prefetch next image to warm cache (non-blocking)
-        if (currentImageIndex < imageFiles.length) {
-          const nextUrl = imageFiles[currentImageIndex].url;
-          const p = new Image(); p.src = nextUrl;
-        }
       }
 
+      let noClickCount = 0;
+      
       function showQuestionCard(){
         galleryWrap.style.display = 'none';
+        noClickCount = 0;
+        
         const row = document.createElement('div');
         row.className = 'btnRow';
+        row.style.flexDirection = 'row';
+        row.style.gap = '20px';
+        row.style.alignItems = 'center';
+        
         const yes = document.createElement('button');
         yes.className = 'bigBtn yes'; 
-        yes.innerHTML = 'YES ❤️';
-        const ab = document.createElement('button');
-        ab.className = 'bigBtn ab'; 
-        ab.innerHTML = 'ABSOLUTELY YES 💖';
+        yes.innerHTML = 'Yes ❤️';
+        yes.id = 'yesBtn';
+        
+        const no = document.createElement('button');
+        no.className = 'bigBtn no';
+        no.innerHTML = 'No 💔';
+        no.id = 'noBtn';
 
         const existing = scene.querySelector('.btnRow');
         if (existing) existing.remove();
         scene.appendChild(row);
         row.appendChild(yes); 
-        row.appendChild(ab);
+        row.appendChild(no);
 
         yes.addEventListener('click', () => { onAnswer('yes'); });
-        ab.addEventListener('click', () => { onAnswer('absolutely'); });
+        no.addEventListener('click', handleNoClick);
+      }
+      
+      function handleNoClick() {
+        noClickCount++;
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        
+        if (noClickCount === 1) {
+          // First click - No becomes "Really?"
+          noBtn.innerHTML = 'Really? 🥺';
+          animateButton(noBtn, 0.8);
+          animateButton(yesBtn, 1.3);
+        } else if (noClickCount === 2) {
+          // Second click - No becomes "I will be sad"
+          noBtn.innerHTML = 'I will be sad 😢';
+          animateButton(noBtn, 0.6);
+          animateButton(yesBtn, 1.6);
+        } else if (noClickCount === 3) {
+          // Third click - No becomes "Pretty please?"
+          noBtn.innerHTML = 'Pretty please? 🥹';
+          animateButton(noBtn, 0.4);
+          animateButton(yesBtn, 2);
+        } else if (noClickCount === 4) {
+          // Fourth click - No becomes tiny
+          noBtn.innerHTML = 'Please? 💝';
+          animateButton(noBtn, 0.2);
+          animateButton(yesBtn, 2.5);
+        } else {
+          // Fifth+ click - No disappears, Yes takes over
+          noBtn.style.opacity = '0';
+          noBtn.style.transform = 'scale(0)';
+          noBtn.style.pointerEvents = 'none';
+          yesBtn.style.transform = 'scale(3)';
+          yesBtn.style.fontSize = '1.5rem';
+          yesBtn.style.width = '100%';
+        }
+      }
+      
+      function animateButton(btn, scale) {
+        btn.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+        btn.style.transform = `scale(${scale})`;
+        if (scale < 1) {
+          btn.style.fontSize = `${1.2 * scale}rem`;
+        } else {
+          btn.style.fontSize = `${1.2 * scale}rem`;
+        }
       }
 
       function onAnswer(choice){
+        // Show "I knew you'd say yes" message
+        if (noClickCount > 0) {
+          const yesMessage = document.createElement('div');
+          yesMessage.className = 'love-quote';
+          yesMessage.style.fontSize = '1.3rem';
+          yesMessage.style.margin = '30px 0 0 0';
+          yesMessage.textContent = 'I knew you would say yes! 💕';
+          yesMessage.style.opacity = '0';
+          yesMessage.style.animation = 'fadeSlideIn 0.8s forwards';
+          scene.appendChild(yesMessage);
+          
+          setTimeout(() => {
+            proceedAfterYes();
+          }, 2000);
+        } else {
+          proceedAfterYes();
+        }
+      }
+      
+      function proceedAfterYes() {
         // Multiple confetti bursts
         const duration = 3000;
         const end = Date.now() + duration;
