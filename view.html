@@ -976,7 +976,6 @@
           noBtn.innerHTML = 'Really? 🥺';
           animateButton(noBtn, 0.85);
           animateButton(yesBtn, 1.2);
-          // Move No button to the right to avoid overlap
           noBtn.style.marginLeft = '10px';
         } else if (noClickCount === 2) {
           // Second click - No becomes "I will be sad"
@@ -984,20 +983,8 @@
           animateButton(noBtn, 0.7);
           animateButton(yesBtn, 1.4);
           noBtn.style.marginLeft = '20px';
-        } else if (noClickCount === 3) {
-          // Third click - No becomes "Pretty please?"
-          noBtn.innerHTML = 'Pretty please? 🥹';
-          animateButton(noBtn, 0.55);
-          animateButton(yesBtn, 1.7);
-          noBtn.style.marginLeft = '30px';
-        } else if (noClickCount === 4) {
-          // Fourth click - No becomes tiny, moves further
-          noBtn.innerHTML = 'Please? 💝';
-          animateButton(noBtn, 0.4);
-          animateButton(yesBtn, 2);
-          noBtn.style.marginLeft = '40px';
         } else {
-          // Fifth+ click - Yes takes over ENTIRE SCREEN (outside card)
+          // Third+ click - Yes takes over ENTIRE SCREEN immediately!
           noBtn.style.opacity = '0';
           noBtn.style.transform = 'scale(0)';
           noBtn.style.pointerEvents = 'none';
@@ -1123,7 +1110,7 @@
         const line = document.createElement('div');
         line.className = 'sub';
         line.style.marginTop = '20px';
-        line.textContent = share.message ? share.message : 'Forever grateful for you ❤️';
+        line.textContent = share.message ? share.message : 'Forever grateful for you ❤��';
         
         scene.appendChild(title);
         scene.appendChild(quote);
