@@ -938,6 +938,9 @@
         galleryWrap.style.display = 'none';
         noClickCount = 0;
         
+        // FIX: DISABLE the global click listener during question phase
+        scene.removeEventListener('click', advance);
+        
         const row = document.createElement('div');
         row.className = 'btnRow';
         row.style.flexDirection = 'row';
@@ -1078,7 +1081,7 @@
         setTimeout(() => {
           const tapHint = document.createElement('div');
           tapHint.className = 'nextHint';
-          tapHint.textContent = '✨ Tap to continue ✨';
+          tapHint.textContent = '✨ Tap to continue ��';
           scene.appendChild(tapHint);
           
           // Add one-time click listener to continue to the actual final message
