@@ -997,31 +997,30 @@
           animateButton(yesBtn, 2);
           noBtn.style.marginLeft = '40px';
         } else {
-          // Fifth+ click - Hide everything else and Yes takes full screen
+          // Fifth+ click - Yes takes over ENTIRE SCREEN (outside card)
           noBtn.style.opacity = '0';
           noBtn.style.transform = 'scale(0)';
           noBtn.style.pointerEvents = 'none';
           
-          // Hide the greeting and quote text
-          const greeting = scene.querySelector('.greeting');
-          const quote = scene.querySelector('.love-quote');
-          if (greeting) greeting.style.opacity = '0';
-          if (quote) quote.style.opacity = '0';
+          // Move button outside card container to body
+          document.body.appendChild(yesBtn);
           
-          // Make Yes button cover entire screen
+          // Make Yes button cover entire viewport
           yesBtn.style.position = 'fixed';
           yesBtn.style.top = '0';
           yesBtn.style.left = '0';
           yesBtn.style.width = '100vw';
           yesBtn.style.height = '100vh';
           yesBtn.style.margin = '0';
+          yesBtn.style.padding = '0';
           yesBtn.style.borderRadius = '0';
           yesBtn.style.fontSize = '3rem';
-          yesBtn.style.transform = 'scale(1)';
-          yesBtn.style.zIndex = '1000';
+          yesBtn.style.transform = 'none';
+          yesBtn.style.zIndex = '9999';
           yesBtn.style.display = 'flex';
           yesBtn.style.alignItems = 'center';
           yesBtn.style.justifyContent = 'center';
+          yesBtn.style.cursor = 'pointer';
         }
       }
       
