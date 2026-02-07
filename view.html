@@ -1045,6 +1045,12 @@
       }
       
       function proceedAfterYes() {
+        // CRITICAL FIX: Remove the fullscreen Yes button if it exists
+        const fullscreenYesBtn = document.getElementById('yesBtn');
+        if (fullscreenYesBtn && fullscreenYesBtn.parentNode === document.body) {
+          fullscreenYesBtn.remove();
+        }
+        
         // Multiple confetti bursts
         const duration = 3000;
         const end = Date.now() + duration;
