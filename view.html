@@ -974,31 +974,54 @@
         if (noClickCount === 1) {
           // First click - No becomes "Really?"
           noBtn.innerHTML = 'Really? 🥺';
-          animateButton(noBtn, 0.8);
-          animateButton(yesBtn, 1.3);
+          animateButton(noBtn, 0.85);
+          animateButton(yesBtn, 1.2);
+          // Move No button to the right to avoid overlap
+          noBtn.style.marginLeft = '10px';
         } else if (noClickCount === 2) {
           // Second click - No becomes "I will be sad"
           noBtn.innerHTML = 'I will be sad 😢';
-          animateButton(noBtn, 0.6);
-          animateButton(yesBtn, 1.6);
+          animateButton(noBtn, 0.7);
+          animateButton(yesBtn, 1.4);
+          noBtn.style.marginLeft = '20px';
         } else if (noClickCount === 3) {
           // Third click - No becomes "Pretty please?"
           noBtn.innerHTML = 'Pretty please? 🥹';
+          animateButton(noBtn, 0.55);
+          animateButton(yesBtn, 1.7);
+          noBtn.style.marginLeft = '30px';
+        } else if (noClickCount === 4) {
+          // Fourth click - No becomes tiny, moves further
+          noBtn.innerHTML = 'Please? 💝';
           animateButton(noBtn, 0.4);
           animateButton(yesBtn, 2);
-        } else if (noClickCount === 4) {
-          // Fourth click - No becomes tiny
-          noBtn.innerHTML = 'Please? 💝';
-          animateButton(noBtn, 0.2);
-          animateButton(yesBtn, 2.5);
+          noBtn.style.marginLeft = '40px';
         } else {
-          // Fifth+ click - No disappears, Yes takes over
+          // Fifth+ click - Hide everything else and Yes takes full screen
           noBtn.style.opacity = '0';
           noBtn.style.transform = 'scale(0)';
           noBtn.style.pointerEvents = 'none';
-          yesBtn.style.transform = 'scale(3)';
-          yesBtn.style.fontSize = '1.5rem';
-          yesBtn.style.width = '100%';
+          
+          // Hide the greeting and quote text
+          const greeting = scene.querySelector('.greeting');
+          const quote = scene.querySelector('.love-quote');
+          if (greeting) greeting.style.opacity = '0';
+          if (quote) quote.style.opacity = '0';
+          
+          // Make Yes button cover entire screen
+          yesBtn.style.position = 'fixed';
+          yesBtn.style.top = '0';
+          yesBtn.style.left = '0';
+          yesBtn.style.width = '100vw';
+          yesBtn.style.height = '100vh';
+          yesBtn.style.margin = '0';
+          yesBtn.style.borderRadius = '0';
+          yesBtn.style.fontSize = '3rem';
+          yesBtn.style.transform = 'scale(1)';
+          yesBtn.style.zIndex = '1000';
+          yesBtn.style.display = 'flex';
+          yesBtn.style.alignItems = 'center';
+          yesBtn.style.justifyContent = 'center';
         }
       }
       
@@ -1018,23 +1041,8 @@
           event.preventDefault();
         }
         
-        // Show "I knew you'd say yes" message
-        if (noClickCount > 0) {
-          const yesMessage = document.createElement('div');
-          yesMessage.className = 'love-quote';
-          yesMessage.style.fontSize = '1.3rem';
-          yesMessage.style.margin = '30px 0 0 0';
-          yesMessage.textContent = 'I knew you would say yes! 💕';
-          yesMessage.style.opacity = '0';
-          yesMessage.style.animation = 'fadeSlideIn 0.8s forwards';
-          scene.appendChild(yesMessage);
-          
-          setTimeout(() => {
-            proceedAfterYes();
-          }, 2000);
-        } else {
-          proceedAfterYes();
-        }
+        // Proceed to confetti and final page
+        proceedAfterYes();
       }
       
       function proceedAfterYes() {
@@ -1068,6 +1076,34 @@
       }
 
       function showFinal(){
+        scene.innerHTML = '';
+        galleryWrap.style.display = 'none';
+        
+        // If user clicked "No" before, show the special message first
+        if (noClickCount > 0) {
+          const knewMessage = document.createElement('div');
+          knewMessage.className = 'love-quote';
+          knewMessage.style.fontSize = '1.5rem';
+          knewMessage.textContent = 'I knew you would say yes! 💕';
+          scene.appendChild(knewMessage);
+          
+          const tapHint = document.createElement('div');
+          tapHint.className = 'nextHint';
+          tapHint.textContent = '✨ Tap to continue ✨';
+          scene.appendChild(tapHint);
+          
+          // Add one-time click listener to continue to the actual final message
+          const continueToFinal = () => {
+            scene.removeEventListener('click', continueToFinal);
+            showActualFinal();
+          };
+          scene.addEventListener('click', continueToFinal);
+        } else {
+          showActualFinal();
+        }
+      }
+      
+      function showActualFinal() {
         scene.innerHTML = '';
         galleryWrap.style.display = 'none';
         
