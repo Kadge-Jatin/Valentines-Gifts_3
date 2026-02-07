@@ -699,7 +699,7 @@
       for(let i = 0; i < 15; i++) {
         const heart = document.createElement('div');
         heart.className = 'heart-float';
-        heart.textContent = hearts[Math.floor(Math.random() * hearts.hearts.length)];
+        heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
         heart.style.left = Math.random() * 100 + '%';
         heart.style.animationDelay = Math.random() * 15 + 's';
         heart.style.fontSize = (15 + Math.random() * 20) + 'px';
@@ -1071,7 +1071,7 @@
         scene.innerHTML = '';
         galleryWrap.style.display = 'none';
         
-        // ALWAYS show "I knew you would say yes!" message for BOTH cases
+        // ONLY CHANGE: ALWAYS show "I knew you would say yes!" for BOTH cases
         const knewMessage = document.createElement('div');
         knewMessage.className = 'love-quote';
         knewMessage.style.fontSize = '1.5rem';
