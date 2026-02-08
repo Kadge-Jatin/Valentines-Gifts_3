@@ -1,0 +1,29 @@
+{
+  "id": "c46acdc80eb4450cbbba65e7532be224",
+  "created_at": "2026-02-08T19:07:56.153Z",
+  "sender": "J",
+  "receiver": "H",
+  "message": "MM",
+  "theme": "rabbit",
+  "files": [
+    {
+      "name": "Gemini_Generated_Image_2.png",
+      "path": "uploads/c46acdc80eb4450cbbba65e7532be224/Gemini_Generated_Image_2.png",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/c46acdc80eb4450cbbba65e7532be224/Gemini_Generated_Image_2.png"
+    },
+    {
+      "name": "Gemini_Generated_Image_1.png",
+      "path": "uploads/c46acdc80eb4450cbbba65e7532be224/Gemini_Generated_Image_1.png",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/c46acdc80eb4450cbbba65e7532be224/Gemini_Generated_Image_1.png"
+    },
+    {
+      "name": "music_2.mp3",
+      "path": "uploads/c46acdc80eb4450cbbba65e7532be224/music_2.mp3",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/c46acdc80eb4450cbbba65e7532be224/music_2.mp3"
+    }
+  ],
+  "background": {
+    "name": "music_2.mp3",
+    "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/c46acdc80eb4450cbbba65e7532be224/music_2.mp3"
+  }
+}
