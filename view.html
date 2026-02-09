@@ -858,7 +858,8 @@
             scene.innerHTML = '';
             const qGreeting = createEl('div');
             qGreeting.className = 'greeting';
-            qGreeting.textContent = 'Will you be my Valentine?';
+            const receiverName = share.receiver || 'you';
+            qGreeting.textContent = `${receiverName}, will you be my Valentine?`;
             scene.appendChild(qGreeting);
             
             const qSub = createEl('div');
@@ -938,9 +939,6 @@
         galleryWrap.style.display = 'none';
         noClickCount = 0;
         
-        // FIX: DISABLE the global click listener during question phase
-        scene.removeEventListener('click', advance);
-        
         const row = document.createElement('div');
         row.className = 'btnRow';
         row.style.flexDirection = 'row';
@@ -979,6 +977,7 @@
           noBtn.innerHTML = 'Really? 🥺';
           animateButton(noBtn, 0.85);
           animateButton(yesBtn, 1.2);
+          // Move No button to the right to avoid overlap
           noBtn.style.marginLeft = '10px';
         } else if (noClickCount === 2) {
           // Second click - No becomes "I will be sad"
@@ -986,8 +985,20 @@
           animateButton(noBtn, 0.7);
           animateButton(yesBtn, 1.4);
           noBtn.style.marginLeft = '20px';
+        } else if (noClickCount === 3) {
+          // Third click - No becomes "Pretty please?"
+          noBtn.innerHTML = 'Pretty please? 🥹';
+          animateButton(noBtn, 0.55);
+          animateButton(yesBtn, 1.7);
+          noBtn.style.marginLeft = '30px';
+        } else if (noClickCount === 4) {
+          // Fourth click - No becomes tiny, moves further
+          noBtn.innerHTML = 'Please? 💝';
+          animateButton(noBtn, 0.4);
+          animateButton(yesBtn, 2);
+          noBtn.style.marginLeft = '40px';
         } else {
-          // Third+ click - Yes takes over ENTIRE SCREEN immediately!
+          // Fifth+ click - Yes takes over ENTIRE SCREEN (outside card)
           noBtn.style.opacity = '0';
           noBtn.style.transform = 'scale(0)';
           noBtn.style.pointerEvents = 'none';
@@ -1030,28 +1041,12 @@
           event.preventDefault();
         }
         
-        // IMMEDIATELY show "I knew you would say yes!" page, THEN start confetti
-        showKnewYouWouldSayYes();
+        // Proceed to confetti and final page
+        proceedAfterYes();
       }
       
-      function showKnewYouWouldSayYes() {
-        // Remove the fullscreen Yes button if it exists
-        const fullscreenYesBtn = document.getElementById('yesBtn');
-        if (fullscreenYesBtn && fullscreenYesBtn.parentNode === document.body) {
-          fullscreenYesBtn.remove();
-        }
-        
-        // Clear the scene and show "I knew you would say yes!" message
-        scene.innerHTML = '';
-        galleryWrap.style.display = 'none';
-        
-        const knewMessage = document.createElement('div');
-        knewMessage.className = 'love-quote';
-        knewMessage.style.fontSize = '1.5rem';
-        knewMessage.textContent = 'I knew you would say yes! 💕';
-        scene.appendChild(knewMessage);
-        
-        // Start confetti on THIS page
+      function proceedAfterYes() {
+        // Multiple confetti bursts
         const duration = 3000;
         const end = Date.now() + duration;
         const colors = ['#d4567f','#ffd1e0','#ff5c8a','#fff2f6','#d4a574'];
@@ -1077,8 +1072,21 @@
           }
         }());
         
-        // After confetti, show "Tap to continue" hint
-        setTimeout(() => {
+        setTimeout(()=>{ renderStep('final'); }, 3000);
+      }
+
+      function showFinal(){
+        scene.innerHTML = '';
+        galleryWrap.style.display = 'none';
+        
+        // If user clicked "No" before, show the special message first
+        if (noClickCount > 0) {
+          const knewMessage = document.createElement('div');
+          knewMessage.className = 'love-quote';
+          knewMessage.style.fontSize = '1.5rem';
+          knewMessage.textContent = 'I knew you would say yes! 💕';
+          scene.appendChild(knewMessage);
+          
           const tapHint = document.createElement('div');
           tapHint.className = 'nextHint';
           tapHint.textContent = '✨ Tap to continue ✨';
@@ -1090,19 +1098,14 @@
             showActualFinal();
           };
           scene.addEventListener('click', continueToFinal);
-        }, 3000);
-      }
-
-      function showFinal(){
-        // This function is no longer called directly from question
-        // It's now called showKnewYouWouldSayYes first
-        showKnewYouWouldSayYes();
+        } else {
+          showActualFinal();
+        }
       }
       
       function showActualFinal() {
         scene.innerHTML = '';
         galleryWrap.style.display = 'none';
-        hintEl.style.display = 'none'; // EXPLICITLY HIDE THE HINT ON FINAL PAGE
         
         const title = document.createElement('div');
         title.className = 'greeting';
@@ -1156,7 +1159,7 @@
         const senderText = share.sender ? `Sent with all my heart by ${share.sender}` : '';
         const receiverText = share.receiver ? `For my dearest ${share.receiver}` : '';
         credit.style.display = 'block';
-        credit.innerHTML = `<div>${senderText}</div><div>${receiverText}</div><div style="margin-top:20px;font-size:1.4rem;font-weight:600;">❤️ Happy Valentine's Day ❤️</div><div style="margin-top:30px;font-size:0.9rem;opacity:0.7;">- Experience created by Kadge Jatin -</div>`;
+        credit.innerHTML = `<div>${senderText}</div><div>${receiverText}</div><div style="margin-top:10px;font-size:0.9rem;">❤️ Happy Valentine's Day ❤️</div>`;
       }
 
       function setupAudioWidget(url, name){
