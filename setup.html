@@ -423,6 +423,79 @@
   </style>
 </head>
 <body>
+  <!-- Token verification: insert immediately after <body> -->
+<script>
+(function () {
+  // URL of the token service verify endpoint (ensure this matches your deployed token service)
+  const VERIFY_URL_BASE = 'https://valentines-token-service.onrender.com';
+
+  function renderMissingToken() {
+    document.documentElement.innerHTML = `
+      <head>
+        <meta charset="utf-8">
+        <title>Missing token</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <style>body{font-family:Arial,Helvetica,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;padding:20px;background:#fff9fb;color:#333} .box{max-width:720px;text-align:center;padding:30px;border-radius:12px;border:1px solid rgba(0,0,0,0.05);box-shadow:0 8px 30px rgba(212,86,127,0.06);} h1{color:#d4567f;margin-bottom:8px;} p{color:#666}</style>
+      </head>
+      <body>
+        <div class="box">
+          <h1>Missing token</h1>
+          <p>This setup page requires a purchase token. Please return to the purchase page to get a setup link.</p>
+        </div>
+      </body>`;
+  }
+
+  function renderExpired() {
+    document.documentElement.innerHTML = `
+      <head>
+        <meta charset="utf-8">
+        <title>Link expired</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <style>body{font-family:Arial,Helvetica,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;padding:20px;background:#fff9fb;color:#333} .box{max-width:720px;text-align:center;padding:30px;border-radius:12px;border:1px solid rgba(0,0,0,0.05);box-shadow:0 8px 30px rgba(212,86,127,0.06);} h1{color:#d4567f;margin-bottom:8px;} p{color:#666}</style>
+      </head>
+      <body>
+        <div class="box">
+          <h1>Link expired</h1>
+          <p>Your setup link has expired. Please purchase again to receive a new setup link.</p>
+        </div>
+      </body>`;
+  }
+
+  try {
+    const hash = window.location.hash || '';
+    const m = hash.match(/[#&]token=([^&]+)/);
+    if (!m) {
+      renderMissingToken();
+      return;
+    }
+    const token = decodeURIComponent(m[1]);
+
+    (async function verify() {
+      try {
+        const resp = await fetch(`${VERIFY_URL_BASE}/verify-purchase?token=${encodeURIComponent(token)}`, { method: 'GET', credentials: 'omit' });
+        if (!resp.ok) {
+          renderExpired();
+          return;
+        }
+        // token valid -> continue loading page normally
+      } catch (err) {
+        console.error('Token verification error', err);
+        document.documentElement.innerHTML = `
+          <head><meta charset="utf-8"><title>Verification error</title></head>
+          <body style="font-family:Arial,Helvetica,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
+            <div style="max-width:720px;text-align:center;padding:30px;">
+              <h1 style="color:#d4567f">Unable to verify token</h1>
+              <p style="color:#666">There was a problem verifying your purchase token. Please try again later.</p>
+            </div>
+          </body>`;
+      }
+    })();
+  } catch (e) {
+    console.error('verifyTokenOnLoad error', e);
+    renderExpired();
+  }
+})();
+</script>
   <!-- Floating hearts background -->
   <div class="hearts-bg" id="heartsBg"></div>
   
@@ -660,19 +733,26 @@
       
       // Handle audio - either default or custom
       if (useDefaultMusic) {
-        // Send a flag to use default music (keeps old field for compatibility)
-        fd.append('useDefaultMusic', 'true');
-
-        // IMPORTANT: send the actual filename that exists in the repo and an absolute URL so the server
-        // can populate share.background.url correctly. (You saved the default file as "music.mp3".)
-        const defaultBgFilename = 'music.mp3';
-        const defaultBgUrl = new URL('music.mp3', location.origin + location.pathname.replace(/\/[^\/]*$/,'/')).href;
-
-        fd.append('bg', defaultBgFilename);
-        // extra helpful hint for the server: full URL to the built-in file
-        fd.append('bgUrl', defaultBgUrl);
-        // Friendly name in case the server wants it
-        fd.append('bgName', 'Default Romantic Music');
+        // Instead of sending just flags/filenames, fetch the built-in file and append it as a real upload.
+        // This ensures the uploader server stores the file and returns a valid background.url in the share JSON.
+        try {
+          const defaultPath = 'music.mp3'; // file stored next to setup.html
+          const r = await fetch(defaultPath);
+          if (!r.ok) throw new Error('Default music fetch failed: ' + r.status);
+          const blob = await r.blob();
+          const defaultBgFilename = 'music.mp3';
+          fd.append('files', blob, defaultBgFilename);
+          fd.append('bg', defaultBgFilename);
+          // keep the compatibility flags
+          fd.append('useDefaultMusic', 'true');
+          fd.append('bgName', 'Default Romantic Music');
+        } catch (err) {
+          console.warn('Could not fetch default music locally, falling back to flag-only:', err);
+          // fallback: still include the flag/name (server may handle it)
+          fd.append('useDefaultMusic', 'true');
+          fd.append('bg', 'music.mp3');
+          fd.append('bgName', 'Default Romantic Music');
+        }
       } else if (selectedAudio) {
         // append custom audio file if present (always treated as background)
         fd.append('files', selectedAudio, selectedAudio.name);
