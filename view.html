@@ -858,7 +858,8 @@
             scene.innerHTML = '';
             const qGreeting = createEl('div');
             qGreeting.className = 'greeting';
-            qGreeting.textContent = '${receiver}, Will you be my Valentine?';
+            // qGreeting.textContent = '${receiver}, Will you be my Valentine?';
+            qGreeting.textContent = `${share?.receiver || 'friend'}, will you be my Valentine?`;
             scene.appendChild(qGreeting);
             
             const qSub = createEl('div');
