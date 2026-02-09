@@ -537,11 +537,13 @@
     let selectedAudio = null;
     let useDefaultMusic = true; // Default music is selected by default
 
-    // Handle music option radio buttons
+    // --- music option handling ---
     musicDefaultRadio.addEventListener('change', () => {
       if (musicDefaultRadio.checked) {
         useDefaultMusic = true;
         customAudioSection.style.display = 'none';
+        // disable the file input to avoid accidental file inclusion
+        if (audioInput) audioInput.disabled = true;
         audioInput.value = '';
         selectedAudio = null;
         renderFileList();
@@ -552,6 +554,7 @@
       if (musicCustomRadio.checked) {
         useDefaultMusic = false;
         customAudioSection.style.display = 'block';
+        if (audioInput) audioInput.disabled = false;
         renderFileList();
       }
     });
@@ -568,6 +571,13 @@
 
     audioInput.addEventListener('change', () => {
       selectedAudio = audioInput.files && audioInput.files[0] ? audioInput.files[0] : null;
+      // If a custom file is chosen, ensure the "custom" radio is selected
+      if (selectedAudio) {
+        musicCustomRadio.checked = true;
+        useDefaultMusic = false;
+        customAudioSection.style.display = 'block';
+        if (audioInput) audioInput.disabled = false;
+      }
       renderFileList();
     });
 
@@ -584,6 +594,7 @@
       selectedFiles = [];
       selectedAudio = null;
       useDefaultMusic = true;
+      if (audioInput) audioInput.disabled = true;
       termsCheckbox.checked = false;
       createBtn.disabled = true;
       renderFileList();
@@ -592,6 +603,7 @@
     });
 
     function renderFileList(){
+      // If nothing chosen and default is false -> show "no files"
       if (!selectedFiles.length && !selectedAudio && !useDefaultMusic){
         filePreview.innerHTML = '<p class="small" style="color:#999;">No files selected yet</p>';
         return;
@@ -605,19 +617,24 @@
                         <div class="small">📷 Image</div>`;
         container.appendChild(it);
       });
-      if (useDefaultMusic){
+
+      if (useDefaultMusic) {
+        // show default music in preview
         const it = document.createElement('div');
         it.className = 'file-item';
         it.innerHTML = `<div><strong>Default Romantic Music</strong><div class="small">Built-in track</div></div>
                         <div class="small">🎵 Background music</div>`;
         container.appendChild(it);
-      } else if (selectedAudio){
+      } else if (selectedAudio) {
         const it = document.createElement('div');
         it.className = 'file-item';
         it.innerHTML = `<div><strong>${escapeHtml(selectedAudio.name)}</strong><div class="small">${(selectedAudio.size/1024).toFixed(1)} KB</div></div>
                         <div class="small">🎵 Background music</div>`;
         container.appendChild(it);
+      } else {
+        // no music chosen but images may exist
       }
+
       filePreview.innerHTML = '';
       filePreview.appendChild(container);
     }
@@ -643,12 +660,17 @@
       
       // Handle audio - either default or custom
       if (useDefaultMusic) {
-        // Send a flag to use default music
+        // Send a flag to use default music (keeps old field for compatibility)
         fd.append('useDefaultMusic', 'true');
+        // Also append a 'bg' name that your server can map to the built-in asset.
+        // Change 'default-romantic.mp3' to the exact filename your server uses if needed.
+        fd.append('bg', 'default-romantic.mp3');
+        // Friendly name in case the server wants it
+        fd.append('bgName', 'Default Romantic Music');
       } else if (selectedAudio) {
         // append custom audio file if present (always treated as background)
         fd.append('files', selectedAudio, selectedAudio.name);
-        // always mark audio as background when present
+        // always mark audio as background when present (same as V1)
         fd.append('bg', selectedAudio.name);
       }
 
@@ -724,6 +746,8 @@
     });
 
     // init
+    // disable audio input by default (since default music is chosen)
+    if (audioInput) audioInput.disabled = true;
     renderFileList();
   </script>
 </body>
