@@ -662,9 +662,15 @@
       if (useDefaultMusic) {
         // Send a flag to use default music (keeps old field for compatibility)
         fd.append('useDefaultMusic', 'true');
-        // Also append a 'bg' name that your server can map to the built-in asset.
-        // Change 'default-romantic.mp3' to the exact filename your server uses if needed.
-        fd.append('bg', 'default-romantic.mp3');
+
+        // IMPORTANT: send the actual filename that exists in the repo and an absolute URL so the server
+        // can populate share.background.url correctly. (You saved the default file as "music.mp3".)
+        const defaultBgFilename = 'music.mp3';
+        const defaultBgUrl = new URL('music.mp3', location.origin + location.pathname.replace(/\/[^\/]*$/,'/')).href;
+
+        fd.append('bg', defaultBgFilename);
+        // extra helpful hint for the server: full URL to the built-in file
+        fd.append('bgUrl', defaultBgUrl);
         // Friendly name in case the server wants it
         fd.append('bgName', 'Default Romantic Music');
       } else if (selectedAudio) {
