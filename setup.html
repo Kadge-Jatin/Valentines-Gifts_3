@@ -423,6 +423,7 @@
   </style>
 </head>
 <body>
+
   <!-- Token verification: insert immediately after <body> -->
 <script>
 (function () {
@@ -534,20 +535,19 @@
     </label>
 
     <label>Background music (optional)
-      <div style="margin-top:10px;">
-        <label style="display:flex;align-items:center;gap:8px;margin-top:0;font-size:1rem;font-weight:400;cursor:pointer;">
-          <input type="radio" name="musicOption" id="musicDefault" value="default" checked style="width:auto;cursor:pointer;">
-          <span>Use default romantic music 🎵</span>
-        </label>
-        <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:1rem;font-weight:400;cursor:pointer;">
-          <input type="radio" name="musicOption" id="musicCustom" value="custom" style="width:auto;cursor:pointer;">
-          <span>Upload my own music</span>
-        </label>
-      </div>
-      <div id="customAudioSection" style="margin-top:10px;display:none;">
-        <input id="audioFile" type="file" accept="audio/*">
-        <span class="hint">Upload your own special song</span>
-      </div>
+      <!-- New: Allow selecting a default track included with the repo and/or uploading a custom audio file.
+           Default tracks should be added to the repository/view page and are referenced by their filename here.
+           You can select a default track and still upload a custom track if you want both available. -->
+      <select id="defaultAudio" style="margin-top:10px;">
+        <option value="">— Use no default music —</option>
+        <!-- Update these option values to match default audio filenames you place in the repo/view directory -->
+        <option value="soft-piano.mp3">Soft Piano (default)</option>
+        <option value="romantic-guitar.mp3">Romantic Guitar (default)</option>
+        <option value="classic-love.mp3">Classic Love (default)</option>
+      </select>
+
+      <input id="audioFile" type="file" accept="audio/*" style="margin-top:12px;">
+      <span class="hint">Choose a default track above and/or upload a custom MP3. If both are provided, the custom upload will be sent to the server and the default choice will also be included in metadata so the view can use either.</span>
     </label>
 
     <div class="preview" id="filePreview">
@@ -570,9 +570,14 @@
 
     <div id="result" class="note" style="display:none;"></div>
     
-    <p class="hint" style="text-align:center;margin-top:20px;">
-      💡 Tip: Use MP3 format for audio. Your creation will be hosted and shareable via a unique link.
-    </p>
+    <div class="hint" style="text-align:center;margin-top:20px;">
+  <div style="margin-bottom:8px;">💡 Tip:</div>
+  <ul style="text-align:left;display:inline-block;margin:0;padding-left:20px;list-style-type:disc;">
+    <li>Use MP3 format for audio.</li>
+    <li>Your creation will be hosted and shared via a unique link.</li>
+    <li>For faster loading and smoother experience, please upload compressed images and small audio files.</li>
+  </ul>
+</div>
   </div>
 
   <script>
@@ -597,9 +602,7 @@
 
     const filesInput = document.getElementById('files');
     const audioInput = document.getElementById('audioFile');
-    const musicDefaultRadio = document.getElementById('musicDefault');
-    const musicCustomRadio = document.getElementById('musicCustom');
-    const customAudioSection = document.getElementById('customAudioSection');
+    const defaultSelect = document.getElementById('defaultAudio');
     const filePreview = document.getElementById('filePreview');
     const createBtn = document.getElementById('createBtn');
     const clearBtn = document.getElementById('clearBtn');
@@ -608,29 +611,7 @@
 
     let selectedFiles = [];
     let selectedAudio = null;
-    let useDefaultMusic = true; // Default music is selected by default
-
-    // --- music option handling ---
-    musicDefaultRadio.addEventListener('change', () => {
-      if (musicDefaultRadio.checked) {
-        useDefaultMusic = true;
-        customAudioSection.style.display = 'none';
-        // disable the file input to avoid accidental file inclusion
-        if (audioInput) audioInput.disabled = true;
-        audioInput.value = '';
-        selectedAudio = null;
-        renderFileList();
-      }
-    });
-
-    musicCustomRadio.addEventListener('change', () => {
-      if (musicCustomRadio.checked) {
-        useDefaultMusic = false;
-        customAudioSection.style.display = 'block';
-        if (audioInput) audioInput.disabled = false;
-        renderFileList();
-      }
-    });
+    let selectedDefault = defaultSelect.value || '';
 
     // Handle terms checkbox
     termsCheckbox.addEventListener('change', () => {
@@ -644,13 +625,11 @@
 
     audioInput.addEventListener('change', () => {
       selectedAudio = audioInput.files && audioInput.files[0] ? audioInput.files[0] : null;
-      // If a custom file is chosen, ensure the "custom" radio is selected
-      if (selectedAudio) {
-        musicCustomRadio.checked = true;
-        useDefaultMusic = false;
-        customAudioSection.style.display = 'block';
-        if (audioInput) audioInput.disabled = false;
-      }
+      renderFileList();
+    });
+
+    defaultSelect.addEventListener('change', () => {
+      selectedDefault = defaultSelect.value || '';
       renderFileList();
     });
 
@@ -661,13 +640,10 @@
       document.getElementById('theme').value = 'rabbit';
       filesInput.value = '';
       audioInput.value = '';
-      musicDefaultRadio.checked = true;
-      musicCustomRadio.checked = false;
-      customAudioSection.style.display = 'none';
+      defaultSelect.value = '';
       selectedFiles = [];
       selectedAudio = null;
-      useDefaultMusic = true;
-      if (audioInput) audioInput.disabled = true;
+      selectedDefault = '';
       termsCheckbox.checked = false;
       createBtn.disabled = true;
       renderFileList();
@@ -676,8 +652,8 @@
     });
 
     function renderFileList(){
-      // If nothing chosen and default is false -> show "no files"
-      if (!selectedFiles.length && !selectedAudio && !useDefaultMusic){
+      // If nothing selected (no images, no custom audio, no default), show placeholder
+      if (!selectedFiles.length && !selectedAudio && !selectedDefault){
         filePreview.innerHTML = '<p class="small" style="color:#999;">No files selected yet</p>';
         return;
       }
@@ -690,24 +666,20 @@
                         <div class="small">📷 Image</div>`;
         container.appendChild(it);
       });
-
-      if (useDefaultMusic) {
-        // show default music in preview
+      if (selectedDefault){
         const it = document.createElement('div');
         it.className = 'file-item';
-        it.innerHTML = `<div><strong>Default Romantic Music</strong><div class="small">Built-in track</div></div>
-                        <div class="small">🎵 Background music</div>`;
+        it.innerHTML = `<div><strong>${escapeHtml(selectedDefault)}</strong><div class="small">Default track included with the experience</div></div>
+                        <div class="small">🎵 Default music</div>`;
         container.appendChild(it);
-      } else if (selectedAudio) {
+      }
+      if (selectedAudio){
         const it = document.createElement('div');
         it.className = 'file-item';
         it.innerHTML = `<div><strong>${escapeHtml(selectedAudio.name)}</strong><div class="small">${(selectedAudio.size/1024).toFixed(1)} KB</div></div>
-                        <div class="small">🎵 Background music</div>`;
+                        <div class="small">🎵 Custom uploaded music</div>`;
         container.appendChild(it);
-      } else {
-        // no music chosen but images may exist
       }
-
       filePreview.innerHTML = '';
       filePreview.appendChild(container);
     }
@@ -723,41 +695,25 @@
       if (!sender) return alert('Please enter your name (sender).');
       if (!receiver) return alert('Please enter the receiver name.');
 
-      if (!selectedFiles.length && !selectedAudio && !useDefaultMusic){
+      if (!selectedFiles.length && !selectedAudio && !selectedDefault){
         if (!confirm('No files or audio selected. Continue anyway?')) return;
       }
 
       const fd = new FormData();
       // append images/files
       for (const f of selectedFiles) fd.append('files', f, f.name);
-      
-      // Handle audio - either default or custom
-      if (useDefaultMusic) {
-        // Instead of sending just flags/filenames, fetch the built-in file and append it as a real upload.
-        // This ensures the uploader server stores the file and returns a valid background.url in the share JSON.
-        try {
-          const defaultPath = 'music.mp3'; // file stored next to setup.html
-          const r = await fetch(defaultPath);
-          if (!r.ok) throw new Error('Default music fetch failed: ' + r.status);
-          const blob = await r.blob();
-          const defaultBgFilename = 'music.mp3';
-          fd.append('files', blob, defaultBgFilename);
-          fd.append('bg', defaultBgFilename);
-          // keep the compatibility flags
-          fd.append('useDefaultMusic', 'true');
-          fd.append('bgName', 'Default Romantic Music');
-        } catch (err) {
-          console.warn('Could not fetch default music locally, falling back to flag-only:', err);
-          // fallback: still include the flag/name (server may handle it)
-          fd.append('useDefaultMusic', 'true');
-          fd.append('bg', 'music.mp3');
-          fd.append('bgName', 'Default Romantic Music');
-        }
-      } else if (selectedAudio) {
-        // append custom audio file if present (always treated as background)
+
+      // If user uploaded a custom audio, append it as before (and mark 'bg' as its filename)
+      if (selectedAudio){
         fd.append('files', selectedAudio, selectedAudio.name);
-        // always mark audio as background when present (same as V1)
+        // always mark audio as background when present (existing server-side behavior)
         fd.append('bg', selectedAudio.name);
+      }
+
+      // If user selected a default track (stored in the repo/view), include its filename as metadata
+      // This allows the view/server to know a default track should be available even if not uploaded.
+      if (selectedDefault){
+        fd.append('defaultBg', selectedDefault);
       }
 
       // metadata fields
@@ -832,8 +788,6 @@
     });
 
     // init
-    // disable audio input by default (since default music is chosen)
-    if (audioInput) audioInput.disabled = true;
     renderFileList();
   </script>
 </body>
