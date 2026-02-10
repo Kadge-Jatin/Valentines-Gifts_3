@@ -1260,20 +1260,34 @@
         canvas.width = 1080;
         canvas.height = 1920;
         
-        // Gradient background
+        // Gradient background - premium original theme
         const gradient = ctx.createLinearGradient(0, 0, 0, 1920);
         gradient.addColorStop(0, '#ffeef4');
         gradient.addColorStop(0.5, '#ffd1e0');
-        gradient.addColorStop(1, '#d4567f');
+        gradient.addColorStop(1, '#ffb3d1');
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, 1080, 1920);
         
-        // Top: Names
-        ctx.fillStyle = '#ffffff';
+        // Top: Names with improved contrast and shadow
         ctx.font = 'bold 60px Sacramento, cursive';
         ctx.textAlign = 'center';
         const nameText = `${share.sender || 'Someone'} → ${share.receiver || 'You'}`;
+        
+        // Shadow for better readability
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 2;
+        
+        // High contrast romantic color (deep burgundy)
+        ctx.fillStyle = '#8b1538';
         ctx.fillText(nameText, 540, 120);
+        
+        // Reset shadow
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
         
         // Center: First Image
         if (imageFiles.length > 0) {
@@ -1294,8 +1308,12 @@
               const x = (1080 - w) / 2;
               const y = 250;
               
-              // Rounded corners
+              // Rounded corners with shadow
               ctx.save();
+              ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
+              ctx.shadowBlur = 20;
+              ctx.shadowOffsetY = 10;
+              
               roundRect(ctx, x, y, w, h, 30);
               ctx.clip();
               ctx.drawImage(img, x, y, w, h);
@@ -1307,13 +1325,43 @@
           });
         }
         
-        // Bottom: Happy Valentine's
-        ctx.fillStyle = '#ffffff';
+        // Bottom: Happy Valentine's with better contrast - REDUCED SPACING
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+        ctx.shadowBlur = 6;
+        ctx.shadowOffsetX = 1;
+        ctx.shadowOffsetY = 2;
+        
+        ctx.fillStyle = '#8b1538';
         ctx.font = 'bold 70px Crimson Text, serif';
         ctx.textAlign = 'center';
-        ctx.fillText('Happy Valentine\'s Day!', 540, 1480);
+        ctx.fillText('Happy Valentine\'s Day!', 540, 1390);
         ctx.font = '80px sans-serif';
-        ctx.fillText('💕', 540, 1570);
+        ctx.fillText('💕', 540, 1475);
+        
+        // Emotional closure line
+        ctx.font = '38px Crimson Text, serif';
+        ctx.fillStyle = '#a52a52';
+        ctx.fillText('Create your own moment of love', 540, 1530);
+        
+        // Reset shadow
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        
+        // QR Code Container with rounded background and shadow
+        const qrContainerX = 60;
+        const qrContainerY = 1580;
+        const qrContainerSize = 300;
+        
+        // Draw rounded white container for QR with shadow
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+        ctx.shadowBlur = 15;
+        ctx.shadowOffsetY = 5;
+        
+        ctx.fillStyle = '#ffffff';
+        roundRect(ctx, qrContainerX, qrContainerY, qrContainerSize, qrContainerSize, 20);
+        ctx.fill();
+        ctx.restore();
         
         // Bottom Left: QR Code
         const qrImg = new Image();
@@ -1322,23 +1370,41 @@
         
         await new Promise((resolve) => {
           qrImg.onload = () => {
-            // White background for QR
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(80, 1650, 280, 280);
-            ctx.drawImage(qrImg, 100, 1670, 240, 240);
+            const qrSize = 240;
+            const qrX = qrContainerX + (qrContainerSize - qrSize) / 2;
+            const qrY = qrContainerY + (qrContainerSize - qrSize) / 2;
+            ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
             resolve();
           };
           qrImg.onerror = resolve;
         });
         
-        // Bottom Right: Text
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 42px Crimson Text, serif';
+        // CTA Text - grouped visually with better emotional copy
+        const ctaX = 420;
+        ctx.fillStyle = '#8b1538';
+        ctx.font = 'bold 48px Crimson Text, serif';
         ctx.textAlign = 'left';
-        ctx.fillText('Make yours now', 400, 1750);
-        ctx.fillText('by scanning!', 400, 1810);
-        ctx.font = '35px Crimson Text, serif';
-        ctx.fillText('✨ KadgeLabs ✨', 400, 1870);
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+        ctx.shadowBlur = 4;
+        ctx.shadowOffsetY = 2;
+        
+        ctx.fillText('Scan to create', ctaX, 1670);
+        ctx.fillText('your love story', ctaX, 1730);
+        
+        // Trust-building brand messaging - WHITE for visibility
+        ctx.font = 'bold 34px Crimson Text, serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        ctx.shadowBlur = 6;
+        ctx.fillText('Made by KadgeLabs', ctaX, 1795);
+        
+        ctx.font = '30px Crimson Text, serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('Follow @kadgelabs', ctaX, 1840);
+        
+        // Reset shadow
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
         
         // Convert to blob
         canvas.toBlob((blob) => {
