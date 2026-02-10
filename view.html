@@ -531,6 +531,18 @@
       font-style:italic;
     }
     
+    .credit .qr-code {
+      margin: 20px auto;
+      max-width: 200px;
+    }
+    
+    .credit .qr-code img {
+      width: 100%;
+      height: auto;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(212,86,127,0.2);
+    }
+    
     /* Mascot */
     .mascot-wrap {
       position:absolute;
@@ -678,19 +690,15 @@
         </div>
       </div>
     </div>
-
     <div id="galleryWrap" style="display:none">
       <div class="fileGallery" id="gallery"></div>
     </div>
-
     <div class="credit" id="credit" style="display:none"></div>
   </div>
-
   <div id="audioWidget" class="audio-controls" style="display:none">
     <button id="playPauseBtn">▶ Play</button>
     <label>Volume <input id="volume" type="range" min="0" max="1" step="0.05" value="0.6"></label>
   </div>
-
   <script>
     // Create floating hearts
     function createFloatingHearts() {
@@ -707,11 +715,9 @@
       }
     }
     createFloatingHearts();
-
     function qsParam(name){ return new URLSearchParams(location.search).get(name); }
     function el(q){ return document.querySelector(q); }
     function createEl(tag, attrs){ const e = document.createElement(tag); for(const k in (attrs||{})) e.setAttribute(k, attrs[k]); return e; }
-
     const loveQuotes = [
       "In your eyes, I found my home",
       "Every love story is beautiful, but ours is my favorite",
@@ -721,7 +727,6 @@
       "You're my person, my forever",
       "In a sea of people, my eyes will always search for you"
     ];
-
     (function(){
       const id = qsParam('share');
       const scene = el('#scene');
@@ -734,16 +739,13 @@
       let share = null;
       let audioEl = null;
       let isPlaying = false;
-
       if (!id) {
         greetingEl.textContent = 'No share id';
         subEl.textContent = 'Missing share id in URL';
         hintEl.style.display = 'none';
         return;
       }
-
       const shareUrl = new URL(`./shares/${id}.json`, location.origin + location.pathname.replace(/\/[^\/]*$/,'/')).href;
-
       fetch(shareUrl).then(r=>{
         if (!r.ok) throw new Error('Share not found (HTTP ' + r.status + ')');
         return r.json();
@@ -756,18 +758,15 @@
         subEl.textContent = 'Please try again in a minute or refresh';
         hintEl.style.display = 'none';
       });
-
       const steps = ['intro','quote1','images','question','final'];
       let stepIndex = 0;
       let currentImageIndex = 0;
       let imageFiles = [];
-
       function startStory(){
         const receiver = share.receiver || 'friend';
         greetingEl.textContent = `Hi ${receiver}!`;
         subEl.innerHTML = `This surprise was made especially for you ❤️`;
         hintEl.textContent = '✨ Tap to continue ✨';
-
         // Store image files for later display
         if (share.files && share.files.length){
           const captions = [
@@ -793,14 +792,11 @@
             }
           }
         }
-
         if (share.background && share.background.url){
           setupAudioWidget(share.background.url, share.background.name);
           el('#audioWidget').style.display = 'flex';
         }
-
         renderMascot(share.theme || 'rabbit');
-
         scene.addEventListener('click', advance);
         let touchStartY = null;
         scene.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; });
@@ -811,7 +807,6 @@
           }
         });
       }
-
       function advance(event){
         // Don't advance if clicking on a button during question phase
         if (event && event.target && (event.target.classList.contains('bigBtn') || event.target.closest('.btnRow'))) {
@@ -826,7 +821,6 @@
           renderStep(steps[stepIndex]);
         }
       }
-
       function renderStep(step){
         hintEl.style.display = 'none';
         galleryWrap.style.display = 'none';
@@ -842,7 +836,6 @@
             hintEl.textContent = '✨ Tap to continue ✨';
             scene.appendChild(hintEl);
             break;
-
           case 'images':
             if (imageFiles.length > 0) {
               currentImageIndex = 0;
@@ -853,12 +846,10 @@
               renderStep('question');
             }
             break;
-
           case 'question':
             scene.innerHTML = '';
             const qGreeting = createEl('div');
             qGreeting.className = 'greeting';
-            // qGreeting.textContent = '${receiver}, Will you be my Valentine?';
             qGreeting.textContent = `${share?.receiver || 'friend'}, will you be my Valentine?`;
             scene.appendChild(qGreeting);
             
@@ -871,26 +862,21 @@
             
             showQuestionCard();
             break;
-
           case 'final':
             showFinal();
             break;
-
           default:
             hintEl.style.display = 'block';
             hintEl.textContent = '✨ Tap to continue ✨';
             break;
         }
       }
-
       function showNextImage(){
         if (currentImageIndex >= imageFiles.length) {
           return;
         }
-
         scene.innerHTML = '';
         galleryWrap.style.display = 'none';
-
         const imageData = imageFiles[currentImageIndex];
         const container = createEl('div');
         container.className = 'single-image-view';
@@ -932,7 +918,6 @@
           : '✨ Tap to continue ✨';
         scene.appendChild(hint);
       }
-
       let noClickCount = 0;
       
       function showQuestionCard(){
@@ -957,13 +942,11 @@
         no.className = 'bigBtn no';
         no.innerHTML = 'No 💔';
         no.id = 'noBtn';
-
         const existing = scene.querySelector('.btnRow');
         if (existing) existing.remove();
         scene.appendChild(row);
         row.appendChild(yes); 
         row.appendChild(no);
-
         yes.addEventListener('click', (e) => { onAnswer('yes', e); });
         no.addEventListener('click', (e) => { handleNoClick(e); });
       }
@@ -1024,7 +1007,6 @@
           btn.style.fontSize = `${1.2 * scale}rem`;
         }
       }
-
       function onAnswer(choice, event){
         if (event) {
           event.stopPropagation();
@@ -1072,7 +1054,6 @@
             origin: { x: 1 },
             colors: colors
           });
-
           if (Date.now() < end) {
             requestAnimationFrame(frame);
           }
@@ -1093,7 +1074,6 @@
           scene.addEventListener('click', continueToFinal);
         }, 3000);
       }
-
       function showFinal(){
         // This function is no longer called directly from question
         // It's now called showKnewYouWouldSayYes first
@@ -1121,7 +1101,6 @@
         scene.appendChild(title);
         scene.appendChild(quote);
         scene.appendChild(line);
-
         // Populate gallery for final display
         if (imageFiles.length > 0){
           gallery.innerHTML = '';
@@ -1153,13 +1132,22 @@
           gallery.classList.add('final-grid');
           galleryWrap.style.display = 'block';
         }
-
         const senderText = share.sender ? `Sent with all my heart by ${share.sender}` : '';
         const receiverText = share.receiver ? `For my dearest ${share.receiver}` : '';
         credit.style.display = 'block';
-        credit.innerHTML = `<div>${senderText}</div><div>${receiverText}</div><div style="margin-top:20px;font-size:1.4rem;font-weight:600;">❤️ Happy Valentine's Day ❤️</div><div style="margin-top:30px;font-size:0.9rem;opacity:0.7;">- Experience created by Kadge Jatin -</div>`;
+        credit.innerHTML = `
+          <div>${senderText}</div>
+          <div>${receiverText}</div>
+          <div style="margin-top:20px;font-size:1.4rem;font-weight:600;">❤️ Happy Valentine's Day ❤️</div>
+          <div style="margin-top:40px;font-size:1rem;font-weight:600;font-style:normal;">Experience created by Kadge Jatin</div>
+          <div style="margin-top:10px;font-size:0.95rem;">Instagram: <a href="https://instagram.com/KadgeLabs" style="color:var(--rose);text-decoration:none;">@KadgeLabs</a>, <a href="https://instagram.com/montykadge" style="color:var(--rose);text-decoration:none;">@montykadge</a></div>
+          <div style="margin-top:8px;font-size:0.95rem;">For any queries, email at <a href="mailto:kadge.jatin@gmail.com" style="color:var(--rose);text-decoration:none;">kadge.jatin@gmail.com</a></div>
+          <div style="margin-top:5px;font-size:0.95rem;">or <a href="mailto:kadgelabs@gmail.com" style="color:var(--rose);text-decoration:none;">kadgelabs@gmail.com</a></div>
+          <div class="qr-code">
+            <img src="qr-code.png" alt="QR Code">
+          </div>
+        `;
       }
-
       function setupAudioWidget(url, name){
         audioEl = document.createElement('audio');
         audioEl.src = url;
@@ -1169,17 +1157,14 @@
         audioEl.crossOrigin = 'anonymous';
         audioEl.style.display = 'none';
         document.body.appendChild(audioEl);
-
         const playBtn = el('#playPauseBtn');
         const volume = el('#volume');
-
         audioEl.play().then(()=>{
           isPlaying = true;
           playBtn.textContent = '⏸ Pause';
         }).catch((err)=>{
           isPlaying = false;
         });
-
         const startOnGesture = async () => {
           if (!audioEl) return;
           if (!isPlaying){
@@ -1194,7 +1179,6 @@
           document.removeEventListener('click', startOnGesture);
         };
         document.addEventListener('click', startOnGesture, { once: true });
-
         playBtn.addEventListener('click', async () => {
           if (!audioEl) return;
           if (isPlaying){
@@ -1212,12 +1196,10 @@
             }
           }
         });
-
         volume.addEventListener('input', () => {
           audioEl.volume = Number(volume.value);
         });
       }
-
       function renderMascot(theme){
         const mascotWrap = document.createElement('div');
         mascotWrap.className = 'mascot-wrap';
@@ -1233,7 +1215,6 @@
         const card = el('#card');
         card.appendChild(mascotWrap);
       }
-
     })();
   </script>
 </body>
