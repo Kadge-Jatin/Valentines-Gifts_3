@@ -1,0 +1,24 @@
+{
+  "id": "41b1033336044221b1acdd170f622ce7",
+  "created_at": "2026-02-10T00:08:03.198Z",
+  "sender": "sdv",
+  "receiver": "sdf",
+  "message": "sdf",
+  "theme": "classic",
+  "files": [
+    {
+      "name": "WhatsApp Image 2026-02-10 at 2.50.00 AM.jpeg",
+      "path": "uploads/41b1033336044221b1acdd170f622ce7/WhatsApp Image 2026-02-10 at 2.50.00 AM.jpeg",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/41b1033336044221b1acdd170f622ce7/WhatsApp%20Image%202026-02-10%20at%202.50.00%20AM.jpeg"
+    },
+    {
+      "name": "ChatGPT Image Feb 10, 2026, 12_31_25 AM.png",
+      "path": "uploads/41b1033336044221b1acdd170f622ce7/ChatGPT Image Feb 10, 2026, 12_31_25 AM.png",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/41b1033336044221b1acdd170f622ce7/ChatGPT%20Image%20Feb%2010%2C%202026%2C%2012_31_25%20AM.png"
+    }
+  ],
+  "background": {
+    "name": "music.mp3",
+    "url": "https://Kadge-Jatin.github.io/Valentines-Gifts_3/music.mp3"
+  }
+}
