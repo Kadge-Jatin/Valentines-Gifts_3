@@ -1325,23 +1325,23 @@
           });
         }
         
-        // Bottom: Happy Valentine's with better contrast - REDUCED SPACING
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-        ctx.shadowBlur = 6;
-        ctx.shadowOffsetX = 1;
-        ctx.shadowOffsetY = 2;
-        
-        ctx.fillStyle = '#8b1538';
-        ctx.font = 'bold 70px Crimson Text, serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('Happy Valentine\'s Day!', 540, 1390);
-        ctx.font = '80px sans-serif';
-        ctx.fillText('💕', 540, 1475);
-        
-        // Emotional closure line
-        ctx.font = '38px Crimson Text, serif';
-        ctx.fillStyle = '#a52a52';
-        ctx.fillText('Create your own moment of love', 540, 1530);
+        // Bottom: Happy Valentine's with better contrast - ADJUSTED SPACING
+ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+ctx.shadowBlur = 6;
+ctx.shadowOffsetX = 1;
+ctx.shadowOffsetY = 2;
+
+ctx.fillStyle = '#8b1538';
+ctx.font = 'bold 70px Crimson Text, serif';
+ctx.textAlign = 'center';
+ctx.fillText('Happy Valentine\'s Day!', 540, 1420);  // Changed from 1390 to 1420
+ctx.font = '80px sans-serif';
+ctx.fillText('💕', 540, 1505);  // Changed from 1475 to 1505
+
+// Emotional closure line
+ctx.font = '38px Crimson Text, serif';
+ctx.fillStyle = '#a52a52';
+ctx.fillText('Create your own moment of love', 540, 1560);  // Changed from 1530 to 1560
         
         // Reset shadow
         ctx.shadowColor = 'transparent';
