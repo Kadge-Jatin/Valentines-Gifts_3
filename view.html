@@ -672,7 +672,6 @@
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 </head>
 <body>
   <!-- Floating hearts background -->
@@ -1164,7 +1163,6 @@
               <img src="qr-code.png" alt="QR Code">
             </div>
             <p style="font-size:1.05rem;color:var(--rose);margin-top:20px;font-weight:600;">✨ Scan the QR & create memories ✨</p>
-
             <p style="font-size:0.95rem;color:#888;margin-top:18px;">Follow the journey → <a href="https://instagram.com/kadgelabs" target="_blank" style="color:var(--rose);text-decoration:none;font-weight:600;">@kadgelabs</a> </p>
           </div>
         `;
@@ -1236,148 +1234,169 @@
         const card = el('#card');
         card.appendChild(mascotWrap);
       }
+      
+      // Card generation functions
       let generatedCardBlob = null;
 
-async function generateShareCard() {
-  const canvas = document.getElementById('cardPreview');
-  const ctx = canvas.getContext('2d');
-  
-  // Instagram Story size
-  canvas.width = 1080;
-  canvas.height = 1920;
-  
-  // Gradient background
-  const gradient = ctx.createLinearGradient(0, 0, 0, 1920);
-  gradient.addColorStop(0, '#ffeef4');
-  gradient.addColorStop(0.5, '#ffd1e0');
-  gradient.addColorStop(1, '#d4567f');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, 1080, 1920);
-  
-  // Top: Names
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 60px Sacramento, cursive';
-  ctx.textAlign = 'center';
-  const nameText = `${share.sender || 'Someone'} → ${share.receiver || 'You'}`;
-  ctx.fillText(nameText, 540, 120);
-  
-  // Center: First Image
-  if (imageFiles.length > 0) {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.src = imageFiles[0].url;
-    
-    await new Promise((resolve) => {
-      img.onload = () => {
-        const maxW = 900;
-        const maxH = 1100;
-        let w = img.width;
-        let h = img.height;
-        const ratio = Math.min(maxW / w, maxH / h);
-        w = w * ratio;
-        h = h * ratio;
-        
-        const x = (1080 - w) / 2;
-        const y = 250;
-        
-        // Rounded corners
-        ctx.save();
+      function roundRect(ctx, x, y, width, height, radius) {
         ctx.beginPath();
-        ctx.roundRect(x, y, w, h, 30);
-        ctx.clip();
-        ctx.drawImage(img, x, y, w, h);
-        ctx.restore();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+      }
+
+      async function generateShareCard() {
+        const canvas = document.getElementById('cardPreview');
+        const ctx = canvas.getContext('2d');
         
-        resolve();
-      };
-      img.onerror = resolve;
-    });
-  }
-  
-  // Bottom: Happy Valentine's
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 70px Crimson Text, serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('Happy Valentine\'s Day!', 540, 1480);
-  ctx.font = '80px sans-serif';
-  ctx.fillText('💕', 540, 1570);
-  
-  // Bottom Left: QR Code
-  const qrImg = new Image();
-  qrImg.crossOrigin = 'anonymous';
-  qrImg.src = './qr-code.png';
-  
-  await new Promise((resolve) => {
-    qrImg.onload = () => {
-      // White background for QR
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(80, 1650, 280, 280);
-      ctx.drawImage(qrImg, 100, 1670, 240, 240);
-      resolve();
-    };
-    qrImg.onerror = resolve;
-  });
-  
-  // Bottom Right: Text
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 42px Crimson Text, serif';
-  ctx.textAlign = 'left';
-  ctx.fillText('Make yours now', 400, 1750);
-  ctx.fillText('by scanning!', 400, 1810);
-  ctx.font = '35px Crimson Text, serif';
-  ctx.fillText('✨ KadgeLabs ✨', 400, 1870);
-  
-  // Convert to blob
-  canvas.toBlob((blob) => {
-    generatedCardBlob = blob;
-    canvas.style.display = 'block';
-    document.getElementById('shareOptions').style.display = 'flex';
-  }, 'image/png');
-}
+        // Instagram Story size
+        canvas.width = 1080;
+        canvas.height = 1920;
+        
+        // Gradient background
+        const gradient = ctx.createLinearGradient(0, 0, 0, 1920);
+        gradient.addColorStop(0, '#ffeef4');
+        gradient.addColorStop(0.5, '#ffd1e0');
+        gradient.addColorStop(1, '#d4567f');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 1080, 1920);
+        
+        // Top: Names
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 60px Sacramento, cursive';
+        ctx.textAlign = 'center';
+        const nameText = `${share.sender || 'Someone'} → ${share.receiver || 'You'}`;
+        ctx.fillText(nameText, 540, 120);
+        
+        // Center: First Image
+        if (imageFiles.length > 0) {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.src = imageFiles[0].url;
+          
+          await new Promise((resolve) => {
+            img.onload = () => {
+              const maxW = 900;
+              const maxH = 1100;
+              let w = img.width;
+              let h = img.height;
+              const ratio = Math.min(maxW / w, maxH / h);
+              w = w * ratio;
+              h = h * ratio;
+              
+              const x = (1080 - w) / 2;
+              const y = 250;
+              
+              // Rounded corners
+              ctx.save();
+              roundRect(ctx, x, y, w, h, 30);
+              ctx.clip();
+              ctx.drawImage(img, x, y, w, h);
+              ctx.restore();
+              
+              resolve();
+            };
+            img.onerror = resolve;
+          });
+        }
+        
+        // Bottom: Happy Valentine's
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 70px Crimson Text, serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Happy Valentine\'s Day!', 540, 1480);
+        ctx.font = '80px sans-serif';
+        ctx.fillText('💕', 540, 1570);
+        
+        // Bottom Left: QR Code
+        const qrImg = new Image();
+        qrImg.crossOrigin = 'anonymous';
+        qrImg.src = './qr-code.png';
+        
+        await new Promise((resolve) => {
+          qrImg.onload = () => {
+            // White background for QR
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(80, 1650, 280, 280);
+            ctx.drawImage(qrImg, 100, 1670, 240, 240);
+            resolve();
+          };
+          qrImg.onerror = resolve;
+        });
+        
+        // Bottom Right: Text
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 42px Crimson Text, serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('Make yours now', 400, 1750);
+        ctx.fillText('by scanning!', 400, 1810);
+        ctx.font = '35px Crimson Text, serif';
+        ctx.fillText('✨ KadgeLabs ✨', 400, 1870);
+        
+        // Convert to blob
+        canvas.toBlob((blob) => {
+          generatedCardBlob = blob;
+          canvas.style.display = 'block';
+          document.getElementById('shareOptions').style.display = 'flex';
+        }, 'image/png');
+      }
 
-function downloadCard() {
-  if (!generatedCardBlob) return;
-  const url = URL.createObjectURL(generatedCardBlob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `valentine-${share.sender || 'memory'}-${share.receiver || 'special'}.png`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
+      function downloadCard() {
+        if (!generatedCardBlob) return;
+        const url = URL.createObjectURL(generatedCardBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `valentine-${share.sender || 'memory'}-${share.receiver || 'special'}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
 
-function shareToInstagram() {
-  if (!generatedCardBlob) return;
-  const file = new File([generatedCardBlob], 'valentine-memory.png', { type: 'image/png' });
-  
-  if (navigator.share && navigator.canShare({ files: [file] })) {
-    navigator.share({
-      files: [file],
-      title: 'Valentine Memory',
-      text: 'Happy Valentine\'s Day! 💕'
-    }).catch(console.error);
-  } else {
-    alert('Please download the image and share it manually to Instagram Stories!');
-    downloadCard();
-  }
-}
+      function shareToInstagram() {
+        if (!generatedCardBlob) return;
+        const file = new File([generatedCardBlob], 'valentine-memory.png', { type: 'image/png' });
+        
+        if (navigator.share && navigator.canShare({ files: [file] })) {
+          navigator.share({
+            files: [file],
+            title: 'Valentine Memory',
+            text: 'Happy Valentine\'s Day! 💕'
+          }).catch(console.error);
+        } else {
+          alert('Please download the image and share it manually to Instagram Stories!');
+          downloadCard();
+        }
+      }
 
-function shareToWhatsApp() {
-  if (!generatedCardBlob) return;
-  const file = new File([generatedCardBlob], 'valentine-memory.png', { type: 'image/png' });
-  
-  if (navigator.share && navigator.canShare({ files: [file] })) {
-    navigator.share({
-      files: [file],
-      title: 'Valentine Memory',
-      text: 'Happy Valentine\'s Day! 💕'
-    }).catch(console.error);
-  } else {
-    alert('Please download the image and share it manually to WhatsApp!');
-    downloadCard();
-  }
-}
+      function shareToWhatsApp() {
+        if (!generatedCardBlob) return;
+        const file = new File([generatedCardBlob], 'valentine-memory.png', { type: 'image/png' });
+        
+        if (navigator.share && navigator.canShare({ files: [file] })) {
+          navigator.share({
+            files: [file],
+            title: 'Valentine Memory',
+            text: 'Happy Valentine\'s Day! 💕'
+          }).catch(console.error);
+        } else {
+          alert('Please download the image and share it manually to WhatsApp!');
+          downloadCard();
+        }
+      }
+      
+      // Make functions globally accessible
+      window.generateShareCard = generateShareCard;
+      window.downloadCard = downloadCard;
+      window.shareToInstagram = shareToInstagram;
+      window.shareToWhatsApp = shareToWhatsApp;
+      
     })();
   </script>
-  <canvas id="shareCanvas" style="display:none;"></canvas>
 </body>
 </html>
