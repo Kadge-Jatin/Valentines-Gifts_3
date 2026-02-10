@@ -1,0 +1,24 @@
+{
+  "id": "3de56a38ac79496ca20d0ac941593ba1",
+  "created_at": "2026-02-10T06:57:30.851Z",
+  "sender": "Jatin",
+  "receiver": "Kadge",
+  "message": "Yo wassup",
+  "theme": "classic",
+  "files": [
+    {
+      "name": "02bd19c1-3adb-45f0-89e3-b4b225b77627.jpg",
+      "path": "uploads/3de56a38ac79496ca20d0ac941593ba1/02bd19c1-3adb-45f0-89e3-b4b225b77627.jpg",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/3de56a38ac79496ca20d0ac941593ba1/02bd19c1-3adb-45f0-89e3-b4b225b77627.jpg"
+    },
+    {
+      "name": "73036cde-bb7b-4272-88bb-d9ebe241f6d5.jpg",
+      "path": "uploads/3de56a38ac79496ca20d0ac941593ba1/73036cde-bb7b-4272-88bb-d9ebe241f6d5.jpg",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/3de56a38ac79496ca20d0ac941593ba1/73036cde-bb7b-4272-88bb-d9ebe241f6d5.jpg"
+    }
+  ],
+  "background": {
+    "name": "music.mp3",
+    "url": "https://Kadge-Jatin.github.io/Valentines-Gifts_3/music.mp3"
+  }
+}
