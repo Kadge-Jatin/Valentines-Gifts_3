@@ -629,6 +629,11 @@
       renderFileList();
     });
 
+    audioInput.addEventListener('change', () => {
+      selectedAudio = audioInput.files && audioInput.files[0] ? audioInput.files[0] : null;
+      renderFileList();
+    });
+
     clearBtn.addEventListener('click', () => {
       document.getElementById('sender').value = '';
       document.getElementById('receiver').value = '';
