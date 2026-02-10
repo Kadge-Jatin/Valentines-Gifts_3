@@ -535,8 +535,14 @@
     </label>
 
     <label>Background music (optional)
-      <input id="audioFile" type="file" accept="audio/*">
-      <span class="hint">Add a special song to set the mood</span>
+      <div style="margin-top:10px;">
+        <label style="display:flex;align-items:center;gap:8px;margin-top:0;font-size:1rem;font-weight:400;cursor:pointer;">
+          <input type="checkbox" id="useDefaultMusic" style="width:auto;cursor:pointer;">
+          <span>Use default romantic music 🎵</span>
+        </label>
+      </div>
+      <input id="audioFile" type="file" accept="audio/*" style="margin-top:10px;">
+      <span class="hint">Or upload your own special song</span>
     </label>
 
     <div class="preview" id="filePreview">
@@ -599,6 +605,7 @@
 
     let selectedFiles = [];
     let selectedAudio = null;
+    let useDefaultMusic = false;
 
     // Handle terms checkbox
     termsCheckbox.addEventListener('change', () => {
@@ -610,8 +617,15 @@
       renderFileList();
     });
 
-    audioInput.addEventListener('change', () => {
-      selectedAudio = audioInput.files && audioInput.files[0] ? audioInput.files[0] : null;
+    document.getElementById('useDefaultMusic').addEventListener('change', (e) => {
+      useDefaultMusic = e.target.checked;
+      if (useDefaultMusic) {
+        audioInput.disabled = true;
+        audioInput.value = '';
+        selectedAudio = null;
+      } else {
+        audioInput.disabled = false;
+      }
       renderFileList();
     });
 
@@ -629,6 +643,8 @@
       renderFileList();
       resultDiv.style.display = 'none';
       resultDiv.textContent = '';
+      document.getElementById('useDefaultMusic').checked = false;  // ADD THIS
+      useDefaultMusic = false;  // ADD THIS
     });
 
     function renderFileList(){
@@ -675,9 +691,11 @@
       // append images/files
       for (const f of selectedFiles) fd.append('files', f, f.name);
       // append audio file if present (always treated as background)
-      if (selectedAudio){
+      // Handle default music or custom upload
+      if (useDefaultMusic) {
+        fd.append('useDefaultMusic', 'true');
+      } else if (selectedAudio) {
         fd.append('files', selectedAudio, selectedAudio.name);
-        // always mark audio as background when present
         fd.append('bg', selectedAudio.name);
       }
 
