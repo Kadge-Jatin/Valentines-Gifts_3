@@ -1,0 +1,29 @@
+{
+  "id": "bae9ead0f66f4ab7989f182deb7db1f7",
+  "created_at": "2026-02-11T22:20:47.193Z",
+  "sender": "Govi",
+  "receiver": "Preeti",
+  "message": "I love us",
+  "theme": "classic",
+  "files": [
+    {
+      "name": "Gemini_Generated_Image_3.png",
+      "path": "uploads/bae9ead0f66f4ab7989f182deb7db1f7/Gemini_Generated_Image_3.png",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/bae9ead0f66f4ab7989f182deb7db1f7/Gemini_Generated_Image_3.png"
+    },
+    {
+      "name": "Gemini_Generated_Image_2.png",
+      "path": "uploads/bae9ead0f66f4ab7989f182deb7db1f7/Gemini_Generated_Image_2.png",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/bae9ead0f66f4ab7989f182deb7db1f7/Gemini_Generated_Image_2.png"
+    },
+    {
+      "name": "Gemini_Generated_Image_1.png",
+      "path": "uploads/bae9ead0f66f4ab7989f182deb7db1f7/Gemini_Generated_Image_1.png",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/bae9ead0f66f4ab7989f182deb7db1f7/Gemini_Generated_Image_1.png"
+    }
+  ],
+  "background": {
+    "name": "music.mp3",
+    "url": "https://Kadge-Jatin.github.io/Valentines-Gifts_3/music.mp3"
+  }
+}
