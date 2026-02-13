@@ -1,0 +1,29 @@
+{
+  "id": "82cfcb04776f4180b15f3ca4f878daac",
+  "created_at": "2026-02-13T19:20:26.986Z",
+  "sender": "Sneha",
+  "receiver": "Niladri",
+  "message": "Love you",
+  "theme": "rabbit",
+  "files": [
+    {
+      "name": "IMG_8468.jpeg",
+      "path": "uploads/82cfcb04776f4180b15f3ca4f878daac/IMG_8468.jpeg",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/82cfcb04776f4180b15f3ca4f878daac/IMG_8468.jpeg"
+    },
+    {
+      "name": "IMG_5592.jpeg",
+      "path": "uploads/82cfcb04776f4180b15f3ca4f878daac/IMG_5592.jpeg",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/82cfcb04776f4180b15f3ca4f878daac/IMG_5592.jpeg"
+    },
+    {
+      "name": "IMG_5566.jpeg",
+      "path": "uploads/82cfcb04776f4180b15f3ca4f878daac/IMG_5566.jpeg",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/82cfcb04776f4180b15f3ca4f878daac/IMG_5566.jpeg"
+    }
+  ],
+  "background": {
+    "name": "music.mp3",
+    "url": "https://Kadge-Jatin.github.io/Valentines-Gifts_3/music.mp3"
+  }
+}
