@@ -1,0 +1,19 @@
+{
+  "id": "0322df28108644ca9c42a8b5fb9bf2dc",
+  "created_at": "2026-02-13T19:20:37.887Z",
+  "sender": "Aparna",
+  "receiver": "Abhijith",
+  "message": "I love you ❤️",
+  "theme": "classic",
+  "files": [
+    {
+      "name": "1764661304604.jpg",
+      "path": "uploads/0322df28108644ca9c42a8b5fb9bf2dc/1764661304604.jpg",
+      "url": "https://raw.githubusercontent.com/Kadge-Jatin/Valentines-Gifts_3/main/uploads/0322df28108644ca9c42a8b5fb9bf2dc/1764661304604.jpg"
+    }
+  ],
+  "background": {
+    "name": "music.mp3",
+    "url": "https://Kadge-Jatin.github.io/Valentines-Gifts_3/music.mp3"
+  }
+}
